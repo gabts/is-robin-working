@@ -1,5 +1,6 @@
 const fs = require("fs");
 const { Client, IntentsBitField } = require("discord.js");
+const { nextWorkingDate } = require("./next-working-date");
 
 // Discord bot client
 const client = new Client({
@@ -82,13 +83,36 @@ setInterval(update, 1000 * 60 * 60);
 const names = ["robin", "<:pizzarobin:1024343299487698974>"];
 const matches = names.map((name) => `is ${name} working?`);
 
+/**
+ * @param {Date} date
+ * @returns {boolean}
+ */
+function isTomorrow(date) {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return (
+    date.getFullYear() === tomorrow.getFullYear() &&
+    date.getMonth() === tomorrow.getMonth() &&
+    tomorrow.getDate() === date.getDate()
+  );
+}
+
 client.on("messageCreate", async (event, listener) => {
   const content = event.content.toLowerCase();
 
   try {
     if (matches.includes(content)) {
-      await event.reply(state.isWorking ? "yes" : "no");
-      return;
+      if (state.isWorking) {
+        await event.reply("yes!");
+        return;
+      }
+
+      const nextDate = nextWorkingDate(state.isWorking);
+      const nextDateString = isTomorrow(nextDate)
+        ? "tomorrow"
+        : `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
+
+      await event.reply(`no, but he'll be back ${nextDateString}!`);
     }
 
     // TODO: set up proper slash command
