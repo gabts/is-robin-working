@@ -106,15 +106,25 @@ client.on("messageCreate", (event) => {
 
   // TODO: set up proper slash command
   if (content === "/is-robin-working no") {
+    if (state.isWorking === false) {
+      event.reply("yes I already know he's not working today...");
+      return;
+    }
+
     setIsRobinWorkingToday(false);
-    event.reply("ok, robin is not working today");
+    event.reply("ok, I hope Robin has a nice day off work!");
     return;
   }
 
   // TODO: set up proper slash command
   if (content === "/is-robin-working yes") {
+    if (state.isWorking === true) {
+      event.reply("yes I already know he's working today...");
+      return;
+    }
+
     setIsRobinWorkingToday(true);
-    event.reply("ok, robin is working today");
+    event.reply("ok, everyone will be happy Robin is working today!");
     return;
   }
 });
