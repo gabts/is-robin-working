@@ -40,20 +40,8 @@ fs.readFile("./cache.json", (err, data) => {
   state.lastUpdateMs = cachedState.lastUpdateMs;
 });
 
-// timeout to prevent username change rate limit
-let timeout = null;
-
-function updateClientUserName() {
-  if (timeout) clearTimeout(timeout);
-  timeout = setTimeout(() => {
-    const username = `Robin ${state.isWorking ? "" : "not "}working`;
-    client.user.setUsername(username).catch((error) => console.error(error));
-  }, 1000 * 60);
-}
-
 function setIsRobinWorkingToday(bool) {
   state.isWorking = bool;
-  updateClientUserName();
   writeStateCache();
 }
 
@@ -148,7 +136,6 @@ client.on("messageCreate", async (event, listener) => {
 
 client.on("ready", () => {
   update();
-  updateClientUserName();
   console.log("bot online!");
 });
 
