@@ -1,9 +1,12 @@
+const utils = require("./utils");
+
 // remember first month is 0
-const redDaysSpring2023 = [
+const holidays2023 = [
   { month: 4, date: 18 },
   { month: 4, date: 19 },
   { month: 5, date: 6 },
   { month: 5, date: 23 },
+  // TODO: add autumn and winter 2023 when available
 ];
 
 const vacation = {
@@ -12,11 +15,11 @@ const vacation = {
 };
 
 /**
- *
+ * Whether given date is weekend, vacation or a holiday.
  * @param {Date} d
  * @returns {boolean}
  */
-function isWeekendOrRedDay(d) {
+function isWeekendOrVacationOrHoliday(d) {
   const day = d.getDay();
 
   // is weekend
@@ -28,40 +31,31 @@ function isWeekendOrRedDay(d) {
   const month = d.getMonth();
   const date = d.getDate();
 
-  return redDaysSpring2023.some(
-    (redDate) => month === redDate.month && date === redDate.date
+  return holidays2023.some(
+    (holiday) => month === holiday.month && date === holiday.date
   );
 }
 
 /**
- *
- * @param {Date} date
- * @param {number} n
- */
-function addDay(date, n) {
-  date.setDate(date.getDate() + n);
-}
-
-/**
- *
+ * Gets next working date from today.
  * @param {boolean} isWorkingToday
  * @returns {Date}
  */
 function nextWorkingDate(isWorkingToday) {
   const date = new Date();
   date.setHours(9, 0, 0, 0);
-  addDay(date, 1);
+  utils.addDay(date, 1);
 
-  while (isWeekendOrRedDay(date)) {
-    addDay(date, 1);
+  while (isWeekendOrVacationOrHoliday(date)) {
+    utils.addDay(date, 1);
   }
 
   // if working today next working day is an off day so we need to add a day
   // again and make sure it is not red day or weekend
   if (isWorkingToday) {
-    addDay(date, 1);
-    while (isWeekendOrRedDay(date)) {
-      addDay(date, 1);
+    utils.addDay(date, 1);
+    while (isWeekendOrVacationOrHoliday(date)) {
+      utils.addDay(date, 1);
     }
   }
 

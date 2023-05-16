@@ -1,6 +1,7 @@
 const fs = require("fs");
 const { Client, IntentsBitField } = require("discord.js");
 const { nextWorkingDate } = require("./next-working-date");
+const utils = require("./utils");
 
 // Discord bot client
 const client = new Client({
@@ -67,30 +68,6 @@ function update() {
 // interval to automatically toggle if robin is working next work day
 setInterval(update, 1000 * 60 * 60);
 
-/**
- * Whether two date objects refer to same date (year, month, day).
- * @param {Date} dateA
- * @param {Date} dateB
- * @returns
- */
-function isSameDate(dateA, dateB) {
-  return (
-    dateA.getFullYear() === dateB.getFullYear() &&
-    dateA.getMonth() === dateB.getMonth() &&
-    dateA.getDate() === dateB.getDate()
-  );
-}
-
-/**
- * @param {Date} date
- * @returns {boolean}
- */
-function isTomorrow(date) {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return isSameDate(date, tomorrow);
-}
-
 // message content to listen to
 const names = ["robin", "<:pizzarobin:1024343299487698974>"];
 const matches = names.map((name) => `is ${name} working?`);
@@ -105,7 +82,7 @@ client.on("messageCreate", (event) => {
     }
 
     const nextDate = nextWorkingDate(state.isWorking);
-    const nextDateString = isTomorrow(nextDate)
+    const nextDateString = utils.isTomorrow(nextDate)
       ? "tomorrow"
       : `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
 
@@ -116,7 +93,7 @@ client.on("messageCreate", (event) => {
   if (content === "is robin working tomorrow?") {
     const nextDate = nextWorkingDate(state.isWorking);
 
-    if (isTomorrow(nextDate)) {
+    if (utils.isTomorrow(nextDate)) {
       event.reply("yes!");
       return;
     }
