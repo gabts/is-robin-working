@@ -115,6 +115,19 @@ client.on("messageCreate", async (event, listener) => {
       await event.reply(`no, but he'll be back ${nextDateString}!`);
     }
 
+    if (content === "is robin working tomorrow?") {
+      const nextDate = nextWorkingDate(state.isWorking);
+
+      if (isTomorrow(nextDate)) {
+        await event.reply("yes!");
+        return;
+      }
+
+      const nextDateString = `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
+
+      await event.reply(`no, but he'll be back ${nextDateString}!`);
+    }
+
     // TODO: set up proper slash command
     if (content === "/is-robin-working no") {
       setIsRobinWorkingToday(false);
