@@ -67,9 +67,19 @@ function update() {
 // interval to automatically toggle if robin is working next work day
 setInterval(update, 1000 * 60 * 60);
 
-// message content to listen to
-const names = ["robin", "<:pizzarobin:1024343299487698974>"];
-const matches = names.map((name) => `is ${name} working?`);
+/**
+ * Whether two date objects refer to same date (year, month, day).
+ * @param {Date} dateA
+ * @param {Date} dateB
+ * @returns
+ */
+function isSameDate(dateA, dateB) {
+  return (
+    dateA.getFullYear() === dateB.getFullYear() &&
+    dateA.getMonth() === dateB.getMonth() &&
+    dateA.getDate() === dateB.getDate()
+  );
+}
 
 /**
  * @param {Date} date
@@ -78,59 +88,57 @@ const matches = names.map((name) => `is ${name} working?`);
 function isTomorrow(date) {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  return (
-    date.getFullYear() === tomorrow.getFullYear() &&
-    date.getMonth() === tomorrow.getMonth() &&
-    tomorrow.getDate() === date.getDate()
-  );
+  return isSameDate(date, tomorrow);
 }
 
-client.on("messageCreate", async (event, listener) => {
+// message content to listen to
+const names = ["robin", "<:pizzarobin:1024343299487698974>"];
+const matches = names.map((name) => `is ${name} working?`);
+
+client.on("messageCreate", (event) => {
   const content = event.content.toLowerCase();
 
-  try {
-    if (matches.includes(content)) {
-      if (state.isWorking) {
-        await event.reply("yes!");
-        return;
-      }
-
-      const nextDate = nextWorkingDate(state.isWorking);
-      const nextDateString = isTomorrow(nextDate)
-        ? "tomorrow"
-        : `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
-
-      await event.reply(`no, but he'll be back ${nextDateString}!`);
-    }
-
-    if (content === "is robin working tomorrow?") {
-      const nextDate = nextWorkingDate(state.isWorking);
-
-      if (isTomorrow(nextDate)) {
-        await event.reply("yes!");
-        return;
-      }
-
-      const nextDateString = `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
-
-      await event.reply(`no, but he'll be back ${nextDateString}!`);
-    }
-
-    // TODO: set up proper slash command
-    if (content === "/is-robin-working no") {
-      setIsRobinWorkingToday(false);
-      await event.reply("ok, robin is not working today");
+  if (matches.includes(content)) {
+    if (state.isWorking) {
+      event.reply("yes!");
       return;
     }
 
-    // TODO: set up proper slash command
-    if (content === "/is-robin-working yes") {
-      setIsRobinWorkingToday(true);
-      await event.reply("ok, robin is working today");
+    const nextDate = nextWorkingDate(state.isWorking);
+    const nextDateString = isTomorrow(nextDate)
+      ? "tomorrow"
+      : `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
+
+    event.reply(`no, but he'll be back ${nextDateString}!`);
+    return;
+  }
+
+  if (content === "is robin working tomorrow?") {
+    const nextDate = nextWorkingDate(state.isWorking);
+
+    if (isTomorrow(nextDate)) {
+      event.reply("yes!");
       return;
     }
-  } catch (error) {
-    console.error(error);
+
+    const nextDateString = `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
+
+    event.reply(`no, but he'll be back ${nextDateString}!`);
+    return;
+  }
+
+  // TODO: set up proper slash command
+  if (content === "/is-robin-working no") {
+    setIsRobinWorkingToday(false);
+    event.reply("ok, robin is not working today");
+    return;
+  }
+
+  // TODO: set up proper slash command
+  if (content === "/is-robin-working yes") {
+    setIsRobinWorkingToday(true);
+    event.reply("ok, robin is working today");
+    return;
   }
 });
 
