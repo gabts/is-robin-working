@@ -12,7 +12,7 @@ function addDay(date) {
  * Whether two date objects refer to same date (year, month, day).
  * @param {Date} dateA
  * @param {Date} dateB
- * @returns
+ * @returns {boolean}
  */
 function isSameDate(dateA, dateB) {
   return (
