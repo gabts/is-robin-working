@@ -137,6 +137,7 @@ client.on("messageCreate", async (event, listener) => {
 client.on("ready", () => {
   update();
   console.log("bot online!");
+  client.user.setUsername("Robin Bot").catch((err) => console.error(err));
 });
 
 client.login(process.env.TOKEN);
