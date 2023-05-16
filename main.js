@@ -57,10 +57,8 @@ function update() {
   if (date === lastUpdateDate) return;
 
   state.lastUpdateMs = today.getTime();
-  const day = today.getDay();
-  const isWeekend = day == 6 || day == 0;
 
-  if (isWeekend) return;
+  if (utils.isWeekend(today)) return;
 
   setIsRobinWorkingToday(!isWorking);
 }

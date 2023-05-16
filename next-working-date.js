@@ -20,13 +20,10 @@ const vacation = {
  * @returns {boolean}
  */
 function isWeekendOrVacationOrHoliday(d) {
-  const day = d.getDay();
-
-  // is weekend
-  if (day === 6 || day === 0) return true;
-
-  // is vacation
+  // is on vacation
   if (d >= vacation.start && d <= vacation.ends) return true;
+
+  if (utils.isWeekend(d)) return true;
 
   const month = d.getMonth();
   const date = d.getDate();

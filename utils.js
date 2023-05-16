@@ -9,6 +9,16 @@ function addDay(date) {
 }
 
 /**
+ * Whether date is saturday or sunday.
+ * @param {Date} date
+ * @returns {boolean}
+ */
+function isWeekend(date) {
+  const day = date.getDay();
+  return day === 0 || day === 6;
+}
+
+/**
  * Whether two date objects refer to same date (year, month, day).
  * @param {Date} dateA
  * @param {Date} dateB
@@ -34,5 +44,6 @@ function isTomorrow(date) {
 
 module.exports = {
   addDay,
+  isWeekend,
   isTomorrow,
 };
