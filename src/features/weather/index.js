@@ -7,6 +7,11 @@ function getDate(d) {
   return [d.getFullYear(), d.getMonth() + 1, d.getDate()].join("-");
 }
 
+function convertKPHtoMS(value) {
+  // km/hour -> 1000m/3600s -> 10/36 -> 5/18 -> 0.2777777777777778
+  return (value * 0.2777777777777778).toFixed(1);
+}
+
 async function replyWeather(context, event, query) {
   const weather = await getCurrentWeather(context.api, query);
 
@@ -21,7 +26,9 @@ async function replyWeather(context, event, query) {
   } = weather.current;
 
   event.reply(
-    `Weather in ${name}, ${region}: ${condition}, temperature: ${temp_c}c, wind: ${wind_kph}km/h going ${wind_dir}, humidity: ${humidity}%, clouds: ${cloud}%`
+    `Weather in ${name}, ${region}: ${condition}, temperature: ${temp_c}c, wind: ${convertKPHtoMS(
+      wind_kph
+    )}m/s going ${wind_dir}, humidity: ${humidity}%, clouds: ${cloud}%`
   );
 }
 
