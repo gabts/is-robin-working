@@ -1,4 +1,5 @@
 const fs = require("fs");
+const utils = require("./utils");
 
 const state = {
   isWorking: false,
@@ -22,7 +23,7 @@ fs.readFile("./cache.json", (err, data) => {
     return;
   }
 
-  const cachedState = JSON.parse(data);
+  const cachedState = JSON.parse(data.toString("utf8"));
   console.log("found cached state", cachedState);
   state.isWorking = cachedState.isWorking;
   state.lastUpdateMs = cachedState.lastUpdateMs;
@@ -47,7 +48,7 @@ function refreshState() {
 
   if (utils.isWeekend(today)) return;
 
-  updateStateIsWorking(!isWorking);
+  updateStateIsWorking(!state.isWorking);
 }
 
 // interval to automatically toggle if robin is working next work day

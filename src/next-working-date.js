@@ -41,18 +41,18 @@ function isWeekendOrVacationOrHoliday(d) {
 function nextWorkingDate(isWorkingToday) {
   const date = new Date();
   date.setHours(9, 0, 0, 0);
-  utils.addDay(date, 1);
+  utils.addDay(date);
 
   while (isWeekendOrVacationOrHoliday(date)) {
-    utils.addDay(date, 1);
+    utils.addDay(date);
   }
 
   // if working today next working day is an off day so we need to add a day
   // again and make sure it is not red day or weekend
   if (isWorkingToday) {
-    utils.addDay(date, 1);
+    utils.addDay(date);
     while (isWeekendOrVacationOrHoliday(date)) {
-      utils.addDay(date, 1);
+      utils.addDay(date);
     }
   }
 
