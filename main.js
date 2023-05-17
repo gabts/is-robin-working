@@ -1,5 +1,7 @@
 const { prepareClient } = require("./src/client");
+
 const IsRobinWorking = require("./src/features/is-robin-working");
+const Fortune = require("./src/features/fortune");
 const Store = require("./src/state");
 
 async function main() {
@@ -7,6 +9,7 @@ async function main() {
   const client = prepareClient();
 
   IsRobinWorking.use(client);
+  Fortune.use(client);
 
   await client.login(process.env.TOKEN);
 }

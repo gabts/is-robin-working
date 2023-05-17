@@ -1,3 +1,5 @@
+const cp = require("child_process");
+
 /**
  * Set date as the coming day.
  * @param {Date} date
@@ -42,8 +44,21 @@ function isTomorrow(date) {
   return isSameDate(date, tomorrow);
 }
 
+const spawn = (cmd, args = [], opts = {}) =>
+  new Promise((resolve, reject) => {
+    let d = { stdout: "", stderr: "" };
+
+    const proc = cp.spawn(cmd, args, opts);
+
+    proc.stdout.on("data", (chunk) => (d.stdout += chunk.toString()));
+    proc.stderr.on("data", (chunk) => (d.stderr += chunk.toString()));
+
+    proc.on("close", (code) => (code > 0 ? reject(d) : resolve(d)));
+  });
+
 module.exports = {
   addDay,
   isWeekend,
   isTomorrow,
+  spawn,
 };
