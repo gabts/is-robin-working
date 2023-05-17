@@ -15,6 +15,10 @@ const reactions = [
     check: /^!fortune$/i,
     callback: async (state, event) => {
       const { id, username } = event.author;
+      const { nickname } = event.member || {};
+
+      const displayName = nickname || username;
+
       const userState = state.fortunes[id] || {
         seen: getDate(new Date(0)),
         content: "",
@@ -35,7 +39,7 @@ const reactions = [
           fortunes: { ...cstate.fortunes, [id]: nextState },
         }));
 
-      event.reply(`Daily fortune for ${username}:\n\`\`\`${fortune}\`\`\``);
+      event.reply(`Daily fortune for ${displayName}:\n\`\`\`${fortune}\`\`\``);
     },
   },
 ];
