@@ -88,7 +88,8 @@ function use(client) {
       await warmup();
 
       refreshState();
-      setInterval(refreshState, 1000 * 60 * 60);
+      const interval = setInterval(refreshState, 1000 * 60 * 60);
+      interval.unref();
     } catch (err) {
       console.error("Failed to start is-robin-working:", err);
       process.exit(1);

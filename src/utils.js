@@ -56,9 +56,17 @@ const spawn = (cmd, args = [], opts = {}) =>
     proc.on("close", (code) => (code > 0 ? reject(d) : resolve(d)));
   });
 
+function getDisplayName(event = {}) {
+  const { username } = event.author || {};
+  const { nickname } = event.member || {};
+
+  return nickname || username || "No name available";
+}
+
 module.exports = {
   addDay,
   isWeekend,
   isTomorrow,
   spawn,
+  getDisplayName,
 };

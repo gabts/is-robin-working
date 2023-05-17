@@ -23,7 +23,8 @@ const Store = new (class State {
       : resolver();
 
     this._updateChain = next;
-    this._updateChain.then(() => {
+
+    return this._updateChain.then(() => {
       if (this._updateChain === next) this._updateChain = null;
     });
   };
