@@ -2,6 +2,7 @@ const fs = require("fs/promises");
 
 const Store = new (class State {
   _state = {};
+  _updateChain = null;
 
   warmup = async () => {
     this._state = { ...this._state, ...(await this._readCache()) };
@@ -11,9 +12,20 @@ const Store = new (class State {
     return { ...this._state };
   };
 
-  update = async (callback) => {
-    this._state = { ...this._state, ...(await callback({ ...this._state })) };
-    await this._writeCache(this._state);
+  update = (callback) => {
+    const resolver = async () => {
+      this._state = { ...this._state, ...(await callback({ ...this._state })) };
+      await this._writeCache(this._state);
+    };
+
+    const next = this._updateChain
+      ? this._updateChain.then(resolver)
+      : resolver();
+
+    this._updateChain = next;
+    this._updateChain.then(() => {
+      if (this._updateChain === next) this._updateChain = null;
+    });
   };
 
   _writeCache = async (state) => {
