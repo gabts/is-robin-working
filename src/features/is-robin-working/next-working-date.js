@@ -59,4 +59,7 @@ function nextWorkingDate(isWorkingToday) {
   return date;
 }
 
-module.exports = { nextWorkingDate };
+module.exports = {
+  isWeekendOrVacationOrHoliday,
+  nextWorkingDate,
+};

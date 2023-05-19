@@ -1,7 +1,10 @@
 const utils = require("../../utils");
 const Store = require("../../state");
 
-const { nextWorkingDate } = require("./next-working-date");
+const {
+  isWeekendOrVacationOrHoliday,
+  nextWorkingDate,
+} = require("./next-working-date");
 
 const reactions = [
   {
@@ -40,11 +43,24 @@ const reactions = [
   {
     check: /^\/is-robin-working (no|yes)$/i,
     callback: (state, event) => {
-      const nextDate = nextWorkingDate(state.isWorking);
       const [_, nextState] = event.content.split(" ");
 
       switch (nextState.toLowerCase()) {
         case "yes":
+          const isNonWorkingDay = isWeekendOrVacationOrHoliday(new Date());
+
+          if (isNonWorkingDay) {
+            const nextDate = nextWorkingDate(state.isWorking);
+            const nextDateString = `${nextDate.getDate()}/${
+              nextDate.getMonth() + 1
+            }`;
+
+            event.reply(
+              `today is not a work day, next valid work day is ${nextDateString}`
+            );
+            return;
+          }
+
           if (state.isWorking === true) {
             event.reply("yes I already know he's working today...");
             return;
@@ -123,7 +139,7 @@ function refreshState() {
 
     const lastUpdateMs = today.getTime();
 
-    return utils.isWeekend(today)
+    return isWeekendOrVacationOrHoliday(today)
       ? { lastUpdateMs }
       : { lastUpdateMs, isWorking: !state.isWorking };
   });
