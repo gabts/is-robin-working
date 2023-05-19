@@ -1,18 +1,34 @@
-const qs = require("querystring");
+import type { Client, Message } from "discord.js";
+import * as qs from "querystring";
 
-const { spawn, getDisplayName } = require("../../utils");
-const Store = require("../../state");
+import utils from "../../utils";
+import Store, { StoreState } from "../../state";
 
-function getDate(d) {
-  return [d.getFullYear(), d.getMonth() + 1, d.getDate()].join("-");
-}
-
-function convertKPHtoMS(value) {
+function convertKPHtoMS(value: number): string {
   // km/hour -> 1000m/3600s -> 10/36 -> 5/18 -> 0.2777777777777778
   return (value * 0.2777777777777778).toFixed(1);
 }
 
-async function replyWeather(context, event, query) {
+interface UserState {
+  defaultLocation?: string;
+}
+
+export interface State {
+  weather: Record<string, UserState>;
+}
+
+interface Context {
+  api: ReturnType<typeof wrap>;
+}
+
+interface ExtendedRequestInit extends RequestInit {
+  query?: {
+    key?: string;
+    q?: string;
+  };
+}
+
+async function replyWeather(context: Context, event: Message, query: string) {
   const weather = await getCurrentWeather(context.api, query);
 
   const { name, region } = weather.location;
@@ -32,7 +48,15 @@ async function replyWeather(context, event, query) {
   );
 }
 
-const reactions = [
+const reactions: {
+  check: RegExp;
+  callback: (
+    context: Context,
+    state: StoreState,
+    match: RegExpMatchArray,
+    event: Message
+  ) => Promise<void>;
+}[] = [
   {
     check: /^!weather$/i,
     callback: async (context, state, match, event) => {
@@ -53,12 +77,14 @@ const reactions = [
 
   {
     check: /^!weather set (.+)$/i,
-    callback: async (context, _state, match, event) => {
+    callback: async (context, state, match, event) => {
       const userId = event.author.id;
       const query = match[1];
 
+      if (!query) return;
+
       await Store.update((state) => {
-        const user = state.weather[userId] || {};
+        const user: UserState = state.weather[userId] || {};
         user.defaultLocation = query;
 
         return {
@@ -70,7 +96,7 @@ const reactions = [
       });
 
       event.reply(
-        `Weather location set for ${getDisplayName(event)} to: ${query}`
+        `Weather location set for ${utils.getDisplayName(event)} to: ${query}`
       );
     },
   },
@@ -78,12 +104,14 @@ const reactions = [
   {
     check: /^!weather (.+)$/i,
     callback: async (context, state, match, event) => {
-      await replyWeather(context, event, match[1]);
+      const query = match[1];
+      if (!query) return;
+      await replyWeather(context, event, query);
     },
   },
 ];
 
-async function processMessage(context, event) {
+async function processMessage(context: Context, event: Message) {
   if (!event.author) return;
   if (event.author.id === "1107944006735904798") return;
 
@@ -104,7 +132,10 @@ async function processMessage(context, event) {
   }
 }
 
-async function getCurrentWeather(request, weatherQuery) {
+async function getCurrentWeather(
+  request: Context["api"],
+  weatherQuery: string
+) {
   const weather = await request("/current.json", {
     query: {
       q: weatherQuery,
@@ -114,46 +145,13 @@ async function getCurrentWeather(request, weatherQuery) {
   return weather;
 }
 
-function use(config, client) {
-  const api = wrap({
-    key: config.weatherToken,
-    root: "https://api.weatherapi.com/v1",
-  });
-
-  const context = { api };
-
-  client.on("messageCreate", (event) => processMessage(context, event));
-
-  client.on("ready", async () => {
-    try {
-      await warmup();
-    } catch (err) {
-      console.error("Failed to start fortune:", err);
-      process.exit(1);
-    }
-  });
-}
-
-async function warmup() {
-  const defaultState = {
-    weather: {},
-  };
-
-  return Store.update((state) => {
-    return {
-      ...defaultState,
-      ...state,
-    };
-  });
-}
-
-const wrap = (api) => {
-  const query = {
+const wrap = (api: { key: string; root: string }) => {
+  const query: ExtendedRequestInit["query"] = {
     key: api.key,
   };
 
-  return async (path, incomingOptions = {}) => {
-    const opts = {
+  return async (path: string, incomingOptions: ExtendedRequestInit = {}) => {
+    const opts: ExtendedRequestInit = {
       ...incomingOptions,
 
       query: {
@@ -175,7 +173,40 @@ const wrap = (api) => {
   };
 };
 
-module.exports = {
+function use(apiKey: string, client: Client) {
+  const api = wrap({
+    key: apiKey,
+    root: "https://api.weatherapi.com/v1",
+  });
+
+  const context: Context = { api };
+
+  client.on("messageCreate", (event) => processMessage(context, event));
+
+  client.on("ready", async () => {
+    try {
+      await warmup();
+    } catch (err) {
+      console.error("Failed to start fortune:", err);
+      process.exit(1);
+    }
+  });
+}
+
+async function warmup() {
+  const defaultState: State = {
+    weather: {},
+  };
+
+  return Store.update((state) => {
+    return {
+      ...defaultState,
+      ...state,
+    };
+  });
+}
+
+export default {
   use,
   processMessage,
   warmup,

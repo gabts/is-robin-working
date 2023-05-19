@@ -1,12 +1,17 @@
-const utils = require("../../utils");
-const Store = require("../../state");
+import type { Client, Message } from "discord.js";
 
-const {
+import utils from "../../utils";
+import Store, { StoreState } from "../../state";
+
+import {
   isWeekendOrVacationOrHoliday,
   nextWorkingDate,
-} = require("./next-working-date");
+} from "./next-working-date";
 
-const reactions = [
+const reactions: {
+  check: RegExp;
+  callback: (state: StoreState, event: Message) => void;
+}[] = [
   {
     check: /^is\s+(robin|<:pizzarobin:1024343299487698974>)\s+working\??$/i,
     callback: (state, event) => {
@@ -44,6 +49,8 @@ const reactions = [
     check: /^\/is-robin-working (no|yes)$/i,
     callback: (state, event) => {
       const [_, nextState] = event.content.split(" ");
+
+      if (!nextState) return;
 
       switch (nextState.toLowerCase()) {
         case "yes":
@@ -84,7 +91,7 @@ const reactions = [
   },
 ];
 
-function use(client) {
+function use(client: Client) {
   client.on("messageCreate", (event) => {
     if (event.author && event.author.id === "1107944006735904798") return;
 
@@ -113,8 +120,13 @@ function use(client) {
   });
 }
 
+export interface State {
+  isWorking: boolean;
+  lastUpdateMs: number;
+}
+
 async function warmup() {
-  const defaultState = {
+  const defaultState: State = {
     isWorking: false,
     lastUpdateMs: 0,
   };
@@ -145,6 +157,4 @@ function refreshState() {
   });
 }
 
-module.exports = {
-  use,
-};
+export default { use };

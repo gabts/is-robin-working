@@ -1,16 +1,21 @@
-const { spawn } = require("../../utils");
-const Store = require("../../state");
+import type { Client, Message } from "discord.js";
+
+import utils from "../../utils";
+import Store, { StoreState } from "../../state";
 
 async function getFortune() {
-  const out = await spawn("fortune", []);
+  const out = await utils.spawn("fortune", []);
   return out.stdout;
 }
 
-function getDate(d) {
+function getDate(d: Date): string {
   return [d.getFullYear(), d.getMonth() + 1, d.getDate()].join("-");
 }
 
-const reactions = [
+const reactions: {
+  check: RegExp;
+  callback: (state: StoreState, event: Message) => void;
+}[] = [
   {
     check: /^!fortune$/i,
     callback: async (state, event) => {
@@ -44,7 +49,7 @@ const reactions = [
   },
 ];
 
-async function processMessage(event) {
+async function processMessage(event: Message) {
   if (!event.author) return;
   if (event.author.id === "1107944006735904798") return;
 
@@ -63,7 +68,7 @@ async function processMessage(event) {
   }
 }
 
-function use(client) {
+function use(client: Client) {
   client.on("messageCreate", processMessage);
 
   client.on("ready", async () => {
@@ -76,8 +81,18 @@ function use(client) {
   });
 }
 
+export interface State {
+  fortunes: Record<
+    string,
+    {
+      seen: string;
+      content: string;
+    }
+  >;
+}
+
 async function warmup() {
-  const defaultState = {
+  const defaultState: State = {
     fortunes: {},
   };
 
@@ -89,7 +104,7 @@ async function warmup() {
   });
 }
 
-module.exports = {
+export default {
   use,
   processMessage,
   warmup,
