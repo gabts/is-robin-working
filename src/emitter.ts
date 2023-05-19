@@ -1,7 +1,9 @@
-class Emitter {
-  _listeners = new Map();
+type Listener = (...args: any[]) => void | Promise<void>;
 
-  on = (evt, cb) => {
+export class Emitter {
+  _listeners = new Map<string, Listener[]>();
+
+  on = (evt: string, cb: Listener) => {
     const listeners = this._listeners.get(evt) || [];
     listeners.push(cb);
 
@@ -9,7 +11,7 @@ class Emitter {
     return cb;
   };
 
-  off = (evt, cb) => {
+  off = (evt: string, cb: Listener) => {
     const listeners = this._listeners.get(evt) || [];
     this._listeners.set(
       evt,
@@ -19,7 +21,7 @@ class Emitter {
     return cb;
   };
 
-  emit = async (evt, ...args) => {
+  emit = async (evt: string, ...args: unknown[]) => {
     const listeners = this._listeners.get(evt) || [];
 
     for (const listener of listeners) {
@@ -27,5 +29,3 @@ class Emitter {
     }
   };
 }
-
-module.exports = Emitter;

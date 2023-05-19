@@ -1,8 +1,7 @@
-const { Client, IntentsBitField } = require("discord.js");
-const Emitter = require("./emitter");
+import { Client, IntentsBitField } from "discord.js";
+import { Emitter } from "./emitter";
 
 function prepareClient() {
-  // Discord bot client
   const client = new Client({
     intents: [
       IntentsBitField.Flags.Guilds,
@@ -20,18 +19,16 @@ function prepareClient() {
 }
 
 class MockClient extends Emitter {
-  login = (_token) => {
+  login = (_token: string): Promise<void> => {
     return this.emit("ready");
   };
 
-  sendMessage = (content) => {
+  sendMessage = (content: string): Promise<void> => {
     const event = {
       author: { id: "author-id", username: "username" },
       member: { id: "member-id", nickname: "nickname" },
-
       content,
-
-      reply: (...args) => {
+      reply: (...args: unknown[]) => {
         console.log(" -- Bot reply --");
         console.log(...args);
       },
@@ -41,11 +38,8 @@ class MockClient extends Emitter {
   };
 }
 
-function prepareMockClient() {
-  return new MockClient();
+function prepareMockClient(): Client {
+  return new MockClient() as any;
 }
 
-module.exports = {
-  prepareClient,
-  prepareMockClient,
-};
+export { prepareClient, prepareMockClient };

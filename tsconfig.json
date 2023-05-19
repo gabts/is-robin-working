@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
-    "checkJs": true,
-    "noEmit": true
+    "module": "CommonJS",
+    "moduleResolution": "nodenext",
+    "noUncheckedIndexedAccess": true,
+    "outDir": "build",
+    "strict": true,
+    "target": "ESNext"
   },
+  "include": ["src"],
   "exclude": ["node_modules"]
 }

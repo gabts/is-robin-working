@@ -1,4 +1,4 @@
-const utils = require("../../utils");
+import utils from "../../utils";
 
 // remember first month is 0
 const holidays2023 = [
@@ -16,10 +16,8 @@ const vacation = {
 
 /**
  * Whether given date is weekend, vacation or a holiday.
- * @param {Date} d
- * @returns {boolean}
  */
-function isWeekendOrVacationOrHoliday(d) {
+export function isWeekendOrVacationOrHoliday(d: Date): boolean {
   // is on vacation
   if (d >= vacation.start && d <= vacation.ends) return true;
 
@@ -35,10 +33,8 @@ function isWeekendOrVacationOrHoliday(d) {
 
 /**
  * Gets next working date from today.
- * @param {boolean} isWorkingToday
- * @returns {Date}
  */
-function nextWorkingDate(isWorkingToday) {
+export function nextWorkingDate(isWorkingToday: boolean): Date {
   const date = new Date();
   date.setHours(9, 0, 0, 0);
   utils.addDay(date);
@@ -58,8 +54,3 @@ function nextWorkingDate(isWorkingToday) {
 
   return date;
 }
-
-module.exports = {
-  isWeekendOrVacationOrHoliday,
-  nextWorkingDate,
-};
