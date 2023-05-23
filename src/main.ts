@@ -1,6 +1,7 @@
 import { prepareClient, prepareMockClient } from "./client";
 import Fortune from "./features/fortune";
 import IsRobinWorking from "./features/is-robin-working";
+import NumberGame from "./features/number-game";
 import Weather from "./features/weather";
 import { Store } from "./state";
 
@@ -19,8 +20,9 @@ async function main() {
   const client =
     process.env.NODE_ENV === "mock" ? prepareMockClient() : prepareClient();
 
-  IsRobinWorking.use(client);
   Fortune.use(client);
+  IsRobinWorking.use(client);
+  NumberGame.use(client);
 
   if (config.weatherToken) {
     Weather.use(config.weatherToken, client);
