@@ -42,6 +42,15 @@ const reactions: {
     },
   },
   {
+    check: /^!numberwang stop$/,
+    callback: (event, content) => {
+      const currentGame = games.get(event.channelId);
+      if (!currentGame) return;
+      games.delete(event.channelId);
+      event.reply(`ok, numberwang game stopped`);
+    },
+  },
+  {
     check: /^\d+$/i,
     callback: (event, content) => {
       const currentGame = games.get(event.channelId);
