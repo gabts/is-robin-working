@@ -15,6 +15,16 @@ const reactions: {
   {
     check: /^!numberwang \d+ \d+$/i,
     callback: (event, content) => {
+      if (
+        event.channelId !== constants.TEAM_HOME_NUMBERWANG_CHANNEL_ID &&
+        event.channelId !== constants.GABRIEL_DEV_CHANNEL
+      ) {
+        event.reply(
+          "for everyones sanity numberwang is only allowed in the numberwang channel!"
+        );
+        return;
+      }
+
       const currentGame = games.get(event.channelId);
       if (currentGame) return;
 
@@ -65,7 +75,7 @@ const reactions: {
       } else if (guess < answer) {
         event.reply("too low");
       } else {
-        event.reply(`correct! ${getDisplayName(event)} wins! 🎉🎉🎉`);
+        event.reply(`that's numberwang! ${getDisplayName(event)} wins! 🎉🎉🎉`);
         games.delete(event.channelId);
       }
     },
