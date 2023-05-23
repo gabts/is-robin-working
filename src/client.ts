@@ -1,8 +1,12 @@
-import { Client, IntentsBitField } from "discord.js";
+import { Client as DiscordClient, IntentsBitField } from "discord.js";
 import { Emitter } from "./emitter";
 
-export function prepareClient() {
-  const client = new Client({
+export type Client = DiscordClient & {
+  sendMessage?: (content: string) => Promise<void>;
+};
+
+export function prepareClient(): Client {
+  const client = new DiscordClient({
     intents: [
       IntentsBitField.Flags.Guilds,
       IntentsBitField.Flags.GuildMembers,

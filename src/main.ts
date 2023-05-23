@@ -4,6 +4,8 @@ import IsRobinWorking from "./features/is-robin-working";
 import Numberwang from "./features/numberwang";
 import TicTacToe from "./features/tic-tac-toe";
 import Weather from "./features/weather";
+import Magic8Ball from "./features/magic-8-ball";
+
 import { Store } from "./state";
 
 async function main() {
@@ -25,6 +27,7 @@ async function main() {
   IsRobinWorking.use(client);
   TicTacToe.use(client);
   Numberwang.use(client);
+  Magic8Ball.use(client);
 
   if (config.weatherToken) {
     Weather.use(config.weatherToken, client);
