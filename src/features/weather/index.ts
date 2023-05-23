@@ -1,8 +1,7 @@
 import type { Client, Message } from "discord.js";
 import * as qs from "querystring";
-
-import utils from "../../utils";
-import Store, { StoreState } from "../../state";
+import { Store, StoreState } from "../../state";
+import * as utils from "../../utils";
 
 function convertKPHtoMS(value: number): string {
   // km/hour -> 1000m/3600s -> 10/36 -> 5/18 -> 0.2777777777777778

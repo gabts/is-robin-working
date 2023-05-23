@@ -7,7 +7,7 @@ const CACHE_PATH = "../cache.json";
 
 export type StoreState = isRobinWorking.State & weather.State & fortune.State;
 
-const Store = new (class StoreClass {
+export const Store = new (class StoreClass {
   #state: StoreState = {
     isWorking: false,
     lastUpdateMs: Date.now(),
@@ -71,5 +71,3 @@ const Store = new (class StoreClass {
     }
   };
 })();
-
-export default Store;

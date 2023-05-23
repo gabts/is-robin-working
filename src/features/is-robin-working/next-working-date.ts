@@ -1,4 +1,4 @@
-import utils from "../../utils";
+import * as utils from "../../utils";
 
 // remember first month is 0
 const holidays2023 = [

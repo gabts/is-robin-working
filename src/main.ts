@@ -1,8 +1,8 @@
-import IsRobinWorking from "./features/is-robin-working";
-import Fortune from "./features/fortune";
-import Weather from "./features/weather";
 import { prepareClient, prepareMockClient } from "./client";
-import Store from "./state";
+import Fortune from "./features/fortune";
+import IsRobinWorking from "./features/is-robin-working";
+import Weather from "./features/weather";
+import { Store } from "./state";
 
 async function main() {
   if (!process.env.TOKEN) {

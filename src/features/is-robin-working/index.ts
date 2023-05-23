@@ -1,7 +1,6 @@
 import type { Client, Message } from "discord.js";
-
-import utils from "../../utils";
-import Store, { StoreState } from "../../state";
+import { Store, StoreState } from "../../state";
+import * as utils from "../../utils";
 
 import {
   isWeekendOrVacationOrHoliday,

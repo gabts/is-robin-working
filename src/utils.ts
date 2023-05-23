@@ -4,7 +4,7 @@ import type { Message } from "discord.js";
 /**
  * Set date as the coming day.
  */
-function addDay(date: Date): Date {
+export function addDay(date: Date): Date {
   date.setDate(date.getDate() + 1);
   return date;
 }
@@ -12,7 +12,7 @@ function addDay(date: Date): Date {
 /**
  * Whether date is saturday or sunday.
  */
-function isWeekend(date: Date): boolean {
+export function isWeekend(date: Date): boolean {
   const day = date.getDay();
   return day === 0 || day === 6;
 }
@@ -20,7 +20,7 @@ function isWeekend(date: Date): boolean {
 /**
  * Whether two date objects refer to same date (year, month, day).
  */
-function isSameDate(dateA: Date, dateB: Date): boolean {
+export function isSameDate(dateA: Date, dateB: Date): boolean {
   return (
     dateA.getFullYear() === dateB.getFullYear() &&
     dateA.getMonth() === dateB.getMonth() &&
@@ -31,12 +31,12 @@ function isSameDate(dateA: Date, dateB: Date): boolean {
 /**
  * Whether a date is tomorrow from current date.
  */
-function isTomorrow(date: Date): boolean {
+export function isTomorrow(date: Date): boolean {
   const tomorrow = addDay(new Date());
   return isSameDate(date, tomorrow);
 }
 
-interface ProcessData {
+interface SpawnProcessData {
   stdout: string;
   stderr: string;
 }
@@ -44,13 +44,13 @@ interface ProcessData {
 /**
  * Spawn some child process.
  */
-function spawn(
+export function spawn(
   cmd: string,
   args: string[] = [],
   opts: cp.SpawnOptionsWithoutStdio = {}
 ) {
-  return new Promise<ProcessData>(function (resolve, reject) {
-    let data: ProcessData = { stdout: "", stderr: "" };
+  return new Promise<SpawnProcessData>(function (resolve, reject) {
+    let data: SpawnProcessData = { stdout: "", stderr: "" };
 
     const proc = cp.spawn(cmd, args, opts);
 
@@ -66,17 +66,9 @@ function spawn(
 /**
  * Get Discord user name.
  */
-function getDisplayName(event: Message) {
+export function getDisplayName(event: Message) {
   const { username } = event.author || {};
   const { nickname } = event.member || {};
 
   return nickname || username || "No name available";
 }
-
-export default {
-  addDay,
-  isWeekend,
-  isTomorrow,
-  spawn,
-  getDisplayName,
-};
