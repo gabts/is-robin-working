@@ -17,7 +17,8 @@ const reactions: {
     callback: (event, content) => {
       if (
         event.channelId !== constants.TEAM_HOME_NUMBERWANG_CHANNEL_ID &&
-        event.channelId !== constants.GABRIEL_DEV_CHANNEL
+        event.channelId !== constants.GABRIEL_DEV_CHANNEL_ID &&
+        event.channelId !== constants.TEAM_HOME_BOT_DEV_CHANNEL_ID
       ) {
         event.reply(
           "for everyones sanity numberwang is only allowed in the numberwang channel!"
