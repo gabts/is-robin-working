@@ -16,15 +16,19 @@ const reactions: {
     check: /^!numbers \d+ \d+$/i,
     callback: (event, content) => {
       const currentGame = games.get(event.channelId);
+      if (currentGame) return;
 
       const [, min, max] = content.split(" ").map(Number);
       if (!min || !max || isNaN(min) || isNaN(max)) return;
 
-      if (!currentGame) {
-        games.set(event.channelId, {
-          answer: Math.floor(Math.random() * (max - min + 1) + min),
-        });
+      if (min === max) {
+        event.reply("don't be a smarty pants...");
+        return;
       }
+
+      games.set(event.channelId, {
+        answer: Math.floor(Math.random() * (max - min + 1) + min),
+      });
 
       event.reply(`which number ${min}-${max} am I thinking of?`);
     },
