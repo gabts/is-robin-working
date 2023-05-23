@@ -22,7 +22,7 @@ const reactions: {
 
       if (!currentGame) {
         games.set(event.channelId, {
-          answer: Math.ceil(Math.random() * (max - min + 1) + min),
+          answer: Math.floor(Math.random() * (max - min + 1) + min),
         });
       }
 
