@@ -79,6 +79,13 @@ const reactions: {
     },
   },
   {
+    check: /^!tic-tac-toe stop$/i,
+    callback: (event, content) => {
+      games.delete(event.channelId);
+      event.reply("tic tac toe game stopped.");
+    },
+  },
+  {
     check: /^([A-C][1-3]|[1-3][A-C])$/i,
     callback: (event, content) => {
       const game = games.get(event.channelId);
