@@ -13,7 +13,7 @@ const reactions: {
   callback: (event: Message, content: string) => void;
 }[] = [
   {
-    check: /^!numbers \d+ \d+$/i,
+    check: /^!numberwang \d+ \d+$/i,
     callback: (event, content) => {
       const currentGame = games.get(event.channelId);
       if (currentGame) return;

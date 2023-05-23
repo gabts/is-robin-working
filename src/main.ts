@@ -1,7 +1,7 @@
 import { prepareClient, prepareMockClient } from "./client";
 import Fortune from "./features/fortune";
 import IsRobinWorking from "./features/is-robin-working";
-import NumberGame from "./features/number-game";
+import Numberwang from "./features/numberwang";
 import Weather from "./features/weather";
 import { Store } from "./state";
 
@@ -22,7 +22,7 @@ async function main() {
 
   Fortune.use(client);
   IsRobinWorking.use(client);
-  NumberGame.use(client);
+  Numberwang.use(client);
 
   if (config.weatherToken) {
     Weather.use(config.weatherToken, client);
