@@ -1,4 +1,5 @@
 import type { Client, Message } from "discord.js";
+import * as constants from "../../constants";
 import { Store, StoreState } from "../../state";
 import * as utils from "../../utils";
 
@@ -59,7 +60,7 @@ const reactions: {
 
 async function processMessage(event: Message) {
   if (!event.author) return;
-  if (event.author.id === "1107944006735904798") return;
+  if (event.author.id === constants.APPLICATION_ID) return;
 
   const state = Store.get();
   const content = event.content.trim();

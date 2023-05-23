@@ -1,7 +1,7 @@
 import type { Client, Message } from "discord.js";
+import * as constants from "../../constants";
 import { Store, StoreState } from "../../state";
 import * as utils from "../../utils";
-
 import {
   isWeekendOrVacationOrHoliday,
   nextWorkingDate,
@@ -92,7 +92,7 @@ const reactions: {
 
 function use(client: Client) {
   client.on("messageCreate", (event) => {
-    if (event.author && event.author.id === "1107944006735904798") return;
+    if (event.author && event.author.id === constants.APPLICATION_ID) return;
 
     const state = Store.get();
     const content = event.content.trim();
