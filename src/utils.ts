@@ -57,6 +57,10 @@ export function spawn(
     proc.stdout.on("data", (chunk) => (data.stdout += chunk.toString()));
     proc.stderr.on("data", (chunk) => (data.stderr += chunk.toString()));
 
+    proc.on("error", (error) => {
+      console.error(error);
+    });
+
     proc.on("close", (code) =>
       code && code > 0 ? reject(data) : resolve(data)
     );

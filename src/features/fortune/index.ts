@@ -33,15 +33,24 @@ const reactions: {
         ? userState.content
         : (await getFortune()).trim();
 
+      if (!fortune) {
+        event.reply(`sorry, I am unable to tell your fortune`);
+        return;
+      }
+
       const nextState = {
         seen: getDate(new Date()),
         content: fortune,
       };
 
-      if (!hasSeenDaily)
+      if (!hasSeenDaily) {
         await Store.update((cstate) => ({
-          fortunes: { ...cstate.fortunes, [id]: nextState },
+          fortunes: {
+            ...cstate.fortunes,
+            [id]: nextState,
+          },
         }));
+      }
 
       event.reply(`Daily fortune for ${displayName}:\n\`\`\`${fortune}\`\`\``);
     },
