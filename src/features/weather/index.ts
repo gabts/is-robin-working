@@ -145,6 +145,19 @@ async function getCurrentWeather(
   return weather;
 }
 
+async function warmup() {
+  const defaultState: State = {
+    weather: {},
+  };
+
+  return Store.update((state) => {
+    return {
+      ...defaultState,
+      ...state,
+    };
+  });
+}
+
 const wrap = (api: { key: string; root: string }) => {
   const query: ExtendedRequestInit["query"] = {
     key: api.key,
@@ -193,21 +206,6 @@ function use(apiKey: string, client: Client) {
   });
 }
 
-async function warmup() {
-  const defaultState: State = {
-    weather: {},
-  };
-
-  return Store.update((state) => {
-    return {
-      ...defaultState,
-      ...state,
-    };
-  });
-}
-
 export default {
   use,
-  processMessage,
-  warmup,
 };

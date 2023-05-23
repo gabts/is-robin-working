@@ -77,19 +77,6 @@ async function processMessage(event: Message) {
   }
 }
 
-function use(client: Client) {
-  client.on("messageCreate", processMessage);
-
-  client.on("ready", async () => {
-    try {
-      await warmup();
-    } catch (err) {
-      console.error("Failed to start fortune:", err);
-      process.exit(1);
-    }
-  });
-}
-
 export interface State {
   fortunes: Record<
     string,
@@ -113,8 +100,19 @@ async function warmup() {
   });
 }
 
+function use(client: Client) {
+  client.on("messageCreate", processMessage);
+
+  client.on("ready", async () => {
+    try {
+      await warmup();
+    } catch (err) {
+      console.error("Failed to start fortune:", err);
+      process.exit(1);
+    }
+  });
+}
+
 export default {
   use,
-  processMessage,
-  warmup,
 };

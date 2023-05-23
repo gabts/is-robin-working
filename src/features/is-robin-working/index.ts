@@ -90,35 +90,6 @@ const reactions: {
   },
 ];
 
-function use(client: Client) {
-  client.on("messageCreate", (event) => {
-    if (event.author && event.author.id === constants.APPLICATION_ID) return;
-
-    const state = Store.get();
-    const content = event.content.trim();
-
-    for (const reaction of reactions) {
-      if (reaction.check.test(content)) {
-        reaction.callback(state, event);
-        return;
-      }
-    }
-  });
-
-  client.on("ready", async () => {
-    try {
-      await warmup();
-
-      refreshState();
-      const interval = setInterval(refreshState, 1000 * 60 * 60);
-      interval.unref();
-    } catch (err) {
-      console.error("Failed to start is-robin-working:", err);
-      process.exit(1);
-    }
-  });
-}
-
 export interface State {
   isWorking: boolean;
   lastUpdateMs: number;
@@ -156,4 +127,35 @@ function refreshState() {
   });
 }
 
-export default { use };
+function use(client: Client) {
+  client.on("messageCreate", (event) => {
+    if (event.author && event.author.id === constants.APPLICATION_ID) return;
+
+    const state = Store.get();
+    const content = event.content.trim();
+
+    for (const reaction of reactions) {
+      if (reaction.check.test(content)) {
+        reaction.callback(state, event);
+        return;
+      }
+    }
+  });
+
+  client.on("ready", async () => {
+    try {
+      await warmup();
+
+      refreshState();
+      const interval = setInterval(refreshState, 1000 * 60 * 60);
+      interval.unref();
+    } catch (err) {
+      console.error("Failed to start is-robin-working:", err);
+      process.exit(1);
+    }
+  });
+}
+
+export default {
+  use,
+};
