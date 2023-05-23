@@ -30,8 +30,18 @@ function renderBoard(b: Board) {
 }
 
 function checkFinished(board: Board, player: Player) {
+  // any horizontal line
   if (board.some((row) => row.every((tile) => tile === player))) return true;
 
+  // any vertical line
+  for (let col = 0; col < 3; col++) {
+    for (let row = 0; row < 3; row++) {
+      if (board[row]![col] !== player) break;
+      if (row === 2) return true;
+    }
+  }
+
+  // diagonal line
   if (
     board[0]![0] === player &&
     board[1]![1] === player &&
@@ -40,6 +50,7 @@ function checkFinished(board: Board, player: Player) {
     return true;
   }
 
+  // other diagonal line
   if (
     board[0]![2] === player &&
     board[1]![1] === player &&
@@ -122,6 +133,7 @@ const reactions: {
         event.channel.send(
           `player ${game.turn} wins! 🎉🎉🎉 \n` + renderBoard(game.board)
         );
+        games.delete(event.channelId);
         return;
       }
 
