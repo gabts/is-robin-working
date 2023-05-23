@@ -26,11 +26,19 @@ const reactions: {
         return;
       }
 
+      if (max > Number.MAX_SAFE_INTEGER || min > Number.MAX_SAFE_INTEGER) {
+        event.reply("only integers allowed");
+        return;
+      }
+
+      const mmin = Math.min(min, max);
+      const mmax = Math.max(min, max);
+
       games.set(event.channelId, {
-        answer: Math.floor(Math.random() * (max - min + 1) + min),
+        answer: Math.floor(Math.random() * (mmax - mmin + 1) + mmin),
       });
 
-      event.reply(`which number ${min}-${max} am I thinking of?`);
+      event.reply(`which number ${mmin}-${mmax} am I thinking of?`);
     },
   },
   {
