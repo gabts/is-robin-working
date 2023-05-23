@@ -1,22 +1,23 @@
 import type { Client, Message } from "discord.js";
 import * as constants from "../../constants";
-import { getDisplayName } from "../../utils";
 
-type Tile = 0 | 1 | 2;
+type Player = 1 | 2;
+type Tile = 0 | Player;
+type Board = Tile[][];
 
 interface Game {
-  board: Tile[][];
+  board: Board;
   turn: 1 | 2;
 }
 
 const games = new Map<string, Game>();
 
-function r(board: Tile[][], row: number, col: number) {
+function r(board: Board, row: number, col: number) {
   const tile = board[row]![col]!;
   return tile === 1 ? "x" : tile === 2 ? "o" : " ";
 }
 
-function renderBoard(b: Tile[][]) {
+function renderBoard(b: Board) {
   let str = "```";
   str += "\n   1   2   3";
   str += `\nA  ${r(b, 0, 0)} | ${r(b, 0, 1)} | ${r(b, 0, 2)}`;
@@ -28,11 +29,19 @@ function renderBoard(b: Tile[][]) {
   return str;
 }
 
-function checkFinished(board: Tile[][], player: 1 | 2) {
-  for (const row of board) {
-    if (row.every((tile) => tile === player)) return true;
+function checkFinished(board: Board, player: Player) {
+  // any horizontal line
+  if (board.some((row) => row.every((tile) => tile === player))) return true;
+
+  // any vertical line
+  for (let col = 0; col < 3; col++) {
+    for (let row = 0; row < 3; row++) {
+      if (board[row]![col] !== player) break;
+      if (row === 2) return true;
+    }
   }
 
+  // diagonal line
   if (
     board[0]![0] === player &&
     board[1]![1] === player &&
@@ -41,6 +50,7 @@ function checkFinished(board: Tile[][], player: 1 | 2) {
     return true;
   }
 
+  // other diagonal line
   if (
     board[0]![2] === player &&
     board[1]![1] === player &&
@@ -62,7 +72,7 @@ const reactions: {
       const currentGame = games.get(event.channelId);
       if (currentGame) return;
 
-      const board: Tile[][] = [
+      const board: Board = [
         [0, 0, 0],
         [0, 0, 0],
         [0, 0, 0],
@@ -123,6 +133,7 @@ const reactions: {
         event.channel.send(
           `player ${game.turn} wins! 🎉🎉🎉 \n` + renderBoard(game.board)
         );
+        games.delete(event.channelId);
         return;
       }
 
