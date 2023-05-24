@@ -1,6 +1,5 @@
 import type { Client, Message } from "discord.js";
 import * as constants from "../../constants";
-import * as utils from "../../utils";
 
 const fortunes = [
   "It is certain.",
@@ -14,6 +13,12 @@ const fortunes = [
   "Outlook good.",
   "Yes.",
   "Signs point to yes.",
+
+  "No.",
+  "What, no, of course not...weirdo",
+  "Cringe...",
+  "Does the pope poop in the woods?",
+  "NOPE!",
 
   "Don't count on it.",
   "My reply is no.",
