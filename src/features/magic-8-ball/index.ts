@@ -2,29 +2,52 @@ import type { Client, Message } from "discord.js";
 import * as constants from "../../constants";
 
 const fortunes = [
-  "It is certain.",
-  "It is decidedly so.",
-  "Without a doubt.",
-  "Yes definitely.",
-  "You may rely on it.",
-
-  "As I see it, yes.",
-  "Most likely.",
-  "Outlook good.",
+  // very positive
+  "YES!!!",
+  "Yes, definitely.",
   "Yes.",
-  "Signs point to yes.",
+  "You can bet your butt on it, yes!",
+  "Obviously, what do you think, duh...",
 
-  "No.",
-  "What, no, of course not...weirdo",
+  // positive
+  "I am certain of it.",
+  "Without a doubt.",
+  "It is known.",
+  "Heck yeah!",
+  "Most likely.",
+
+  // slighty yes
+  "Yup",
+  "Yeah probably.",
+  "Yass!",
+  "Does the Pope have a funny hat?",
+  "Mhmm",
+
+  // wild card
+  "Let's flip a coin... *flip* YES!",
   "Cringe...",
-  "Does the pope poop in the woods?",
-  "NOPE!",
+  "Let's flip a coin... *flip* NO!",
 
+  // slighty no
+  "Nah",
+  "Probably not",
+  "*Borat voice* Not!",
+  "Does the Pope poop in the woods?",
+  "Nope",
+
+  // negative
+  "No?",
+  "I don't think so...",
+  "Uhmm... no.",
+  "What, no, of course not...weirdo.",
   "Don't count on it.",
-  "My reply is no.",
-  "My sources say no.",
-  "Outlook not so good.",
+
+  // very negative
+  "No... baby gonna cry about it?",
   "Very doubtful.",
+  "No.",
+  "Absolutely not.",
+  "NOPE!",
 ];
 
 const reactions: {
