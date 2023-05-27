@@ -71,15 +71,15 @@ const reactions: {
         response += `${getDisplayName(event)} finished game in ${
           game.guesses.length
         } moves! 🎉🎉🎉`;
-      } else if (game.guesses.length === 5) {
-        response += "Game over.";
+      } else if (game.guesses.length === 6) {
+        response += `Game over. The word was "${answer}".`;
       }
 
       response += "```ansi\n";
       response += game.guesses.join("\n");
       response += "\n```";
 
-      if (game.guesses.length === 5) {
+      if (game.guesses.length === 6) {
         map.delete(authorId);
       }
 
