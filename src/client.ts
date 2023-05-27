@@ -32,6 +32,7 @@ export function prepareMockClient(): Client {
       const event = {
         author: { id: "author-id", username: "username" },
         member: { id: "member-id", nickname: "nickname" },
+        channelId: "xxx",
         content,
         reply: (...args: unknown[]) => {
           console.log(" -- Bot reply --");
