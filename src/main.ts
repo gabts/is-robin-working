@@ -5,11 +5,14 @@ import Numberwang from "./features/numberwang";
 import TicTacToe from "./features/tic-tac-toe";
 import Weather from "./features/weather";
 import Magic8Ball from "./features/magic-8-ball";
+import Word from "./features/word";
 
 import { Store } from "./state";
 
 async function main() {
-  if (!process.env.TOKEN) {
+  const isMock = process.env.NODE_ENV === "mock";
+
+  if (!isMock && !process.env.TOKEN) {
     throw new Error("Missing discord bot token");
   }
 
@@ -20,14 +23,14 @@ async function main() {
 
   await Store.warmup();
 
-  const client =
-    process.env.NODE_ENV === "mock" ? prepareMockClient() : prepareClient();
+  const client = isMock ? prepareMockClient() : prepareClient();
 
   Fortune.use(client);
   IsRobinWorking.use(client);
   TicTacToe.use(client);
   Numberwang.use(client);
   Magic8Ball.use(client);
+  Word.use(client);
 
   if (config.weatherToken) {
     Weather.use(config.weatherToken, client);
