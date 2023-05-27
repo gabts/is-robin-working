@@ -1,6 +1,7 @@
 import type { Client, Message } from "discord.js";
 import * as constants from "../../constants";
 import { getDisplayName } from "../../utils";
+import { validWords } from "./valid-words";
 
 interface Game {
   answer: string;
@@ -45,8 +46,14 @@ const reactions: {
       const game = map.get(authorId);
       if (!game) return;
 
-      const { answer } = game;
       const guess = match[0].substring(6).toUpperCase();
+
+      if (!validWords.includes(guess)) {
+        event.reply("Not a valid word");
+        return;
+      }
+
+      const { answer } = game;
 
       let result = "";
 
