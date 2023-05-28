@@ -1,8 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "dev": "nodemon build/main.js --ignore *.json",
-    "start": "node build/main.js"
+    "dev": "NODE_ENV=development nodemon build/main.js --ignore *.json",
+    "start": "NODE_ENV=production node build/main.js"
   },
   "dependencies": {
     "discord.js": "^14.11.0"
