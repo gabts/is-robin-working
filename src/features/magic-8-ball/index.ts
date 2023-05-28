@@ -1,5 +1,6 @@
 import type { Client, Message } from "discord.js";
 import * as constants from "../../constants";
+import type { DiscordSlashCommand } from "../../main";
 
 const fortunes = [
   // very positive
@@ -87,7 +88,7 @@ async function processMessage(event: Message) {
   }
 }
 
-function use(client: Client) {
+function use(client: Client, commands: DiscordSlashCommand[]) {
   client.on("messageCreate", processMessage);
 }
 

@@ -3,6 +3,7 @@ import * as qs from "querystring";
 import * as constants from "../../constants";
 import { Store, StoreState } from "../../state";
 import * as utils from "../../utils";
+import type { DiscordSlashCommand } from "../../main";
 
 function convertKPHtoMS(value: number): string {
   // km/hour -> 1000m/3600s -> 10/36 -> 5/18 -> 0.2777777777777778
@@ -186,7 +187,7 @@ const wrap = (api: { key: string; root: string }) => {
   };
 };
 
-function use(apiKey: string, client: Client) {
+function use(apiKey: string, client: Client, commands: DiscordSlashCommand[]) {
   const api = wrap({
     key: apiKey,
     root: "https://api.weatherapi.com/v1",

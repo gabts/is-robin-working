@@ -3,6 +3,7 @@ import * as constants from "../../constants";
 import { getDisplayName } from "../../utils";
 import { answers } from "./answers";
 import { guesses } from "./guesses";
+import type { DiscordSlashCommand } from "../../main";
 
 interface Game {
   answer: string;
@@ -116,7 +117,7 @@ async function processMessage(event: Message) {
   }
 }
 
-function use(client: Client) {
+function use(client: Client, commands: DiscordSlashCommand[]) {
   client.on("messageCreate", processMessage);
 }
 

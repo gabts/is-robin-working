@@ -1,6 +1,7 @@
 import type { Client, Message } from "discord.js";
 import * as constants from "../../constants";
 import { getDisplayName } from "../../utils";
+import type { DiscordSlashCommand } from "../../main";
 
 interface Game {
   answer: number;
@@ -83,7 +84,7 @@ const reactions: {
   },
 ];
 
-function use(client: Client) {
+function use(client: Client, commands: DiscordSlashCommand[]) {
   client.on("messageCreate", (event) => {
     if (event.author.id === constants.APPLICATION_ID) return;
 

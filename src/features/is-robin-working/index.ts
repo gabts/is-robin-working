@@ -6,6 +6,7 @@ import {
   isWeekendOrVacationOrHoliday,
   nextWorkingDate,
 } from "./next-working-date";
+import type { DiscordSlashCommand } from "../../main";
 
 const reactions: {
   check: RegExp;
@@ -127,7 +128,7 @@ function refreshState() {
   });
 }
 
-function use(client: Client) {
+function use(client: Client, commands: DiscordSlashCommand[]) {
   client.on("messageCreate", (event) => {
     if (event.author && event.author.id === constants.APPLICATION_ID) return;
 

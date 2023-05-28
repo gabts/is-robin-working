@@ -14,8 +14,6 @@ export class RobinBotClient extends Discord.Client {
   constructor() {
     super(intents);
   }
-
-  commands = new Discord.Collection();
 }
 
 export interface MockRobinBotClient extends RobinBotClient {

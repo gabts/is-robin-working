@@ -2,6 +2,7 @@ import type { Client, Message } from "discord.js";
 import * as constants from "../../constants";
 import { Store, StoreState } from "../../state";
 import * as utils from "../../utils";
+import type { DiscordSlashCommand } from "../../main";
 
 async function getFortune() {
   const out = await utils.spawn("fortune", []);
@@ -100,7 +101,7 @@ async function warmup() {
   });
 }
 
-function use(client: Client) {
+function use(client: Client, commands: DiscordSlashCommand[]) {
   client.on("messageCreate", processMessage);
 
   client.on("ready", async () => {

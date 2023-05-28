@@ -1,5 +1,6 @@
 import type { Client, Message } from "discord.js";
 import * as constants from "../../constants";
+import type { DiscordSlashCommand } from "../../main";
 
 type Player = 1 | 2;
 type Tile = 0 | Player;
@@ -146,7 +147,7 @@ const reactions: {
   },
 ];
 
-function use(client: Client) {
+function use(client: Client, commands: DiscordSlashCommand[]) {
   client.on("messageCreate", (event) => {
     if (event.author.id === constants.APPLICATION_ID) return;
 
