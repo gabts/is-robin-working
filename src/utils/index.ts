@@ -1,6 +1,8 @@
 import * as cp from "child_process";
 import type { Message } from "discord.js";
 
+export * from "./emitter";
+
 /**
  * Set date as the coming day.
  */

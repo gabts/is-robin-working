@@ -1,31 +1,40 @@
-import { Client as DiscordClient, IntentsBitField } from "discord.js";
-import { Emitter } from "./emitter";
+import * as Discord from "discord.js";
+import { Emitter } from "./utils";
 
-export type Client = DiscordClient & {
-  sendMessage?: (content: string) => Promise<void>;
+const intents = {
+  intents: [
+    Discord.IntentsBitField.Flags.Guilds,
+    Discord.IntentsBitField.Flags.GuildMembers,
+    Discord.IntentsBitField.Flags.GuildMessages,
+    Discord.IntentsBitField.Flags.MessageContent,
+  ],
 };
 
-export function prepareClient(): Client {
-  const client = new DiscordClient({
-    intents: [
-      IntentsBitField.Flags.Guilds,
-      IntentsBitField.Flags.GuildMembers,
-      IntentsBitField.Flags.GuildMessages,
-      IntentsBitField.Flags.MessageContent,
-    ],
-  });
+export class RobinBotClient extends Discord.Client {
+  constructor() {
+    super(intents);
+  }
 
-  client.on("ready", () => {
-    console.log("bot online!");
-  });
-
-  return client;
+  commands = new Discord.Collection();
 }
 
-export function prepareMockClient(): Client {
-  return new (class MockClient extends Emitter {
+export interface MockRobinBotClient extends RobinBotClient {
+  sendMessage: (msg: string) => Promise<void>;
+}
+
+export function prepareMockClient(): MockRobinBotClient {
+  return new (class MockRobinBotClient extends Emitter {
     login = (_token: string): Promise<void> => {
-      return this.emit("ready");
+      const client = {
+        channels: {
+          cache: {
+            get: () => undefined,
+            fetch: () => null,
+          },
+        },
+      };
+
+      return this.emit("ready", client);
     };
 
     sendMessage = (content: string): Promise<void> => {
