@@ -88,7 +88,7 @@ const reactions: {
       response += game.guesses.join("\n");
       response += "\n```";
 
-      if (game.guesses.length === 6) {
+      if (guess === answer || game.guesses.length === 6) {
         map.delete(authorId);
       }
 
