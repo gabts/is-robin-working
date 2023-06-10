@@ -187,7 +187,11 @@ const wrap = (api: { key: string; root: string }) => {
   };
 };
 
-function use(apiKey: string, client: Client, commands: DiscordSlashCommand[]) {
+export function use(
+  apiKey: string,
+  client: Client,
+  commands: DiscordSlashCommand[]
+) {
   const api = wrap({
     key: apiKey,
     root: "https://api.weatherapi.com/v1",
@@ -206,7 +210,3 @@ function use(apiKey: string, client: Client, commands: DiscordSlashCommand[]) {
     }
   });
 }
-
-export default {
-  use,
-};

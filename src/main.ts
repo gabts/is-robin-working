@@ -8,13 +8,13 @@ import {
   GABE_DEV_APPLICATION_ID,
   TEAM_HOME_BOT_DEV_CHANNEL_ID,
 } from "./constants";
-import Fortune from "./features/fortune";
-import IsRobinWorking from "./features/is-robin-working";
-import Numberwang from "./features/numberwang";
-import TicTacToe from "./features/tic-tac-toe";
-import Weather from "./features/weather";
-import Magic8Ball from "./features/magic-8-ball";
-import Word from "./features/word";
+import * as Fortune from "./features/fortune";
+import * as IsRobinWorking from "./features/is-robin-working";
+import * as Numberwang from "./features/numberwang";
+import * as TicTacToe from "./features/tic-tac-toe";
+import * as Weather from "./features/weather";
+import * as Magic8Ball from "./features/magic-8-ball";
+import * as Word from "./features/word";
 import { Store } from "./state";
 import { APPLICATION_ID } from "./constants";
 

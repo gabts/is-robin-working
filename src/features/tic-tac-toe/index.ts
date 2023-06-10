@@ -147,7 +147,7 @@ const reactions: {
   },
 ];
 
-function use(client: Client, commands: DiscordSlashCommand[]) {
+export function use(client: Client, commands: DiscordSlashCommand[]) {
   client.on("messageCreate", (event) => {
     if (event.author.id === constants.APPLICATION_ID) return;
 
@@ -161,7 +161,3 @@ function use(client: Client, commands: DiscordSlashCommand[]) {
     }
   });
 }
-
-export default {
-  use,
-};

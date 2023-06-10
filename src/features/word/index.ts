@@ -117,10 +117,6 @@ async function processMessage(event: Message) {
   }
 }
 
-function use(client: Client, commands: DiscordSlashCommand[]) {
+export function use(client: Client, commands: DiscordSlashCommand[]) {
   client.on("messageCreate", processMessage);
 }
-
-export default {
-  use,
-};

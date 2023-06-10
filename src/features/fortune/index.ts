@@ -101,7 +101,7 @@ async function warmup() {
   });
 }
 
-function use(client: Client, commands: DiscordSlashCommand[]) {
+export function use(client: Client, commands: DiscordSlashCommand[]) {
   client.on("messageCreate", processMessage);
 
   client.on("ready", async () => {
@@ -113,7 +113,3 @@ function use(client: Client, commands: DiscordSlashCommand[]) {
     }
   });
 }
-
-export default {
-  use,
-};
