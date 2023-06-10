@@ -111,24 +111,6 @@ robinBot.registerFeature({
   },
   reactions: [
     {
-      check: /^!weather$/i,
-      handler: async (message) => {
-        if (!message.author) return;
-
-        const user = Store.get().weather[message.author.id];
-
-        if (!user || !user.defaultLocation) {
-          message.reply(
-            `There's no location stored for user.\nSet default location with \`!weather set <location query>\`\nwhere <location query> is e.g.: \`motala, ostergotland\` or \`58.4446,14.8949\`\nSee full docs here: https://www.weatherapi.com/docs/`
-          );
-          return;
-        }
-
-        await replyWeather(message, user.defaultLocation);
-      },
-    },
-
-    {
       check: /^!weather set (.+)$/i,
       handler: async (message, match) => {
         const userId = message.author.id;
@@ -162,6 +144,24 @@ robinBot.registerFeature({
         const query = match[1];
         if (!query) return;
         await replyWeather(message, query);
+      },
+    },
+
+    {
+      check: /^!weather$/i,
+      handler: async (message) => {
+        if (!message.author) return;
+
+        const user = Store.get().weather[message.author.id];
+
+        if (!user || !user.defaultLocation) {
+          message.reply(
+            `There's no location stored for user.\nSet default location with \`!weather set <location query>\`\nwhere <location query> is e.g.: \`motala, ostergotland\` or \`58.4446,14.8949\`\nSee full docs here: https://www.weatherapi.com/docs/`
+          );
+          return;
+        }
+
+        await replyWeather(message, user.defaultLocation);
       },
     },
   ],
