@@ -31,12 +31,19 @@ const reactions: {
       };
 
       const hasSeenDaily = userState.seen === getDate(new Date());
-      const fortune = hasSeenDaily
-        ? userState.content
-        : (await getFortune()).trim();
+
+      let fortune = hasSeenDaily ? userState.content : null;
+
+      for (let i = 0; i < 100; i++) {
+        const newFortune = (await getFortune()).trim();
+        if (newFortune.length <= 2000) {
+          fortune = newFortune;
+          break;
+        }
+      }
 
       if (!fortune) {
-        event.reply(`sorry, I am unable to tell your fortune`);
+        event.reply("Sorry, I am unable to tell your fortune");
         return;
       }
 
@@ -69,7 +76,7 @@ async function processMessage(event: Message) {
   try {
     for (const reaction of reactions) {
       if (reaction.check.test(content)) {
-        await reaction.callback(state, event);
+        reaction.callback(state, event);
         return;
       }
     }
