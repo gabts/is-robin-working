@@ -42,7 +42,10 @@ export const robinBot = new (class RobinBot {
       const content = message.content.trim();
       for (const { check, handler } of this.#reactionHandlers) {
         const match = content.match(check);
-        if (match) handler(message, match);
+        if (match) {
+          handler(message, match);
+          break;
+        }
       }
     });
   }
@@ -81,14 +84,12 @@ export const robinBot = new (class RobinBot {
       for (const { command, description, handler } of commands) {
         this.#commands.push({ name: command, description });
         this.#commandHandlers[command] = handler;
-        break;
       }
     }
 
     if (reactions) {
       for (const { check, handler } of reactions) {
         this.#reactionHandlers.push({ check, handler });
-        break;
       }
     }
   };
