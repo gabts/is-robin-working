@@ -81,12 +81,14 @@ export const robinBot = new (class RobinBot {
       for (const { command, description, handler } of commands) {
         this.#commands.push({ name: command, description });
         this.#commandHandlers[command] = handler;
+        break;
       }
     }
 
     if (reactions) {
       for (const { check, handler } of reactions) {
         this.#reactionHandlers.push({ check, handler });
+        break;
       }
     }
   };
