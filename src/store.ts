@@ -48,9 +48,14 @@ export const Store = new (class StoreClass {
     });
   };
 
+  #timeout: null | NodeJS.Timeout = null;
+
   #writeCache = async (state: StoreState): Promise<void> => {
-    await fs.writeFile(CACHE_PATH, JSON.stringify(state));
-    console.log("wrote state to cache.", state);
+    if (this.#timeout) clearTimeout(this.#timeout);
+    this.#timeout = setTimeout(async () => {
+      await fs.writeFile(CACHE_PATH, JSON.stringify(state));
+      console.log("store > wrote state to cache.", state);
+    }, 100);
   };
 
   #readCache = async (): Promise<Partial<StoreState>> => {
@@ -58,7 +63,7 @@ export const Store = new (class StoreClass {
       const data = await fs.readFile(CACHE_PATH);
       const cachedState = JSON.parse(data.toString("utf8"));
 
-      console.log("read cached state", cachedState);
+      console.log("store > read cached state", cachedState);
 
       return cachedState;
     } catch (err) {

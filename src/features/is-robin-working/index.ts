@@ -1,117 +1,31 @@
-import type { Client, Message } from "discord.js";
-import * as constants from "../../constants";
-import { Store, StoreState } from "../../state";
+import { Store } from "../../store";
 import * as utils from "../../utils";
 import {
   isWeekendOrVacationOrHoliday,
   nextWorkingDate,
 } from "./next-working-date";
-import type { DiscordSlashCommand } from "../../main";
 
-const reactions: {
-  check: RegExp;
-  callback: (state: StoreState, event: Message) => void;
-}[] = [
-  {
-    check: /^is\s+(robin|<:pizzarobin:1024343299487698974>)\s+working\??$/i,
-    callback: (state, event) => {
-      if (state.isWorking) {
-        event.reply("yes!");
-        return;
-      }
-
-      const nextDate = nextWorkingDate(state.isWorking);
-      const nextDateString = utils.isTomorrow(nextDate)
-        ? "tomorrow"
-        : `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
-
-      event.reply(`no, but he'll be back ${nextDateString}!`);
-    },
-  },
-
-  {
-    check: /^is\s+robin\s+working\s+tomorrow\??$/i,
-    callback: (state, event) => {
-      const nextDate = nextWorkingDate(state.isWorking);
-
-      if (utils.isTomorrow(nextDate)) {
-        event.reply("yes!");
-        return;
-      }
-
-      const nextDateString = `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
-
-      event.reply(`no, but he'll be back ${nextDateString}!`);
-    },
-  },
-
-  {
-    check: /^\/is-robin-working (no|yes)$/i,
-    callback: (state, event) => {
-      const [_, nextState] = event.content.split(" ");
-
-      if (!nextState) return;
-
-      switch (nextState.toLowerCase()) {
-        case "yes":
-          const isNonWorkingDay = isWeekendOrVacationOrHoliday(new Date());
-
-          if (isNonWorkingDay) {
-            const nextDate = nextWorkingDate(state.isWorking);
-            const nextDateString = `${nextDate.getDate()}/${
-              nextDate.getMonth() + 1
-            }`;
-
-            event.reply(
-              `today is not a work day, next valid work day is ${nextDateString}`
-            );
-            return;
-          }
-
-          if (state.isWorking === true) {
-            event.reply("yes I already know he's working today...");
-            return;
-          }
-
-          Store.update(() => ({ isWorking: true }));
-          event.reply("ok, everyone will be happy Robin is working today!");
-          return;
-
-        case "no":
-          if (state.isWorking === false) {
-            event.reply("yes I already know he's not working today...");
-            return;
-          }
-
-          Store.update(() => ({ isWorking: false }));
-          event.reply("ok, I hope Robin has a nice day off work!");
-          return;
-      }
-    },
-  },
-];
+import { robinBot } from "../../robin-bot";
 
 export interface State {
   isWorking: boolean;
   lastUpdateMs: number;
 }
 
-async function warmup() {
+function warmup() {
   const defaultState: State = {
     isWorking: false,
     lastUpdateMs: 0,
   };
 
-  return Store.update((state) => {
-    return {
-      ...defaultState,
-      ...state,
-    };
-  });
+  Store.update((state) => ({
+    ...defaultState,
+    ...state,
+  }));
 }
 
 function refreshState() {
-  console.log("running update!");
+  console.log("Is Robin Working > refreshing state");
 
   return Store.update((state) => {
     const lastUpdateDate = new Date(state.lastUpdateMs).getDate();
@@ -128,31 +42,102 @@ function refreshState() {
   });
 }
 
-export function use(client: Client, commands: DiscordSlashCommand[]) {
-  client.on("messageCreate", (event) => {
-    if (event.author && event.author.id === constants.APPLICATION_ID) return;
-
-    const state = Store.get();
-    const content = event.content.trim();
-
-    for (const reaction of reactions) {
-      if (reaction.check.test(content)) {
-        reaction.callback(state, event);
-        return;
-      }
-    }
-  });
-
-  client.on("ready", async () => {
+robinBot.registerFeature({
+  name: "Is Robin Working",
+  warmUp: () => {
     try {
-      await warmup();
-
+      warmup();
       refreshState();
       const interval = setInterval(refreshState, 1000 * 60 * 60);
       interval.unref();
     } catch (err) {
-      console.error("Failed to start is-robin-working:", err);
+      console.error(err);
       process.exit(1);
     }
-  });
-}
+  },
+  reactions: [
+    {
+      check: /^is\s+(robin|<:pizzarobin:1024343299487698974>)\s+working\??$/i,
+      handler: (message) => {
+        const state = Store.get();
+
+        if (state.isWorking) {
+          message.reply("yes!");
+          return;
+        }
+
+        const nextDate = nextWorkingDate(state.isWorking);
+        const nextDateString = utils.isTomorrow(nextDate)
+          ? "tomorrow"
+          : `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
+
+        message.reply(`no, but he'll be back ${nextDateString}!`);
+      },
+    },
+
+    {
+      check: /^is\s+robin\s+working\s+tomorrow\??$/i,
+      handler: (message) => {
+        const nextDate = nextWorkingDate(Store.get().isWorking);
+
+        if (utils.isTomorrow(nextDate)) {
+          message.reply("yes!");
+          return;
+        }
+
+        const nextDateString = `${nextDate.getDate()}/${
+          nextDate.getMonth() + 1
+        }`;
+
+        message.reply(`no, but he'll be back ${nextDateString}!`);
+      },
+    },
+
+    {
+      check: /^\/is-robin-working (no|yes)$/i,
+      handler: (message) => {
+        const [_, nextState] = message.content.split(" ");
+
+        if (!nextState) return;
+
+        const state = Store.get();
+
+        switch (nextState.toLowerCase()) {
+          case "yes":
+            const isNonWorkingDay = isWeekendOrVacationOrHoliday(new Date());
+
+            if (isNonWorkingDay) {
+              const nextDate = nextWorkingDate(state.isWorking);
+              const nextDateString = `${nextDate.getDate()}/${
+                nextDate.getMonth() + 1
+              }`;
+
+              message.reply(
+                `today is not a work day, next valid work day is ${nextDateString}`
+              );
+              return;
+            }
+
+            if (state.isWorking === true) {
+              message.reply("yes I already know he's working today...");
+              return;
+            }
+
+            Store.update(() => ({ isWorking: true }));
+            message.reply("ok, everyone will be happy Robin is working today!");
+            return;
+
+          case "no":
+            if (state.isWorking === false) {
+              message.reply("yes I already know he's not working today...");
+              return;
+            }
+
+            Store.update(() => ({ isWorking: false }));
+            message.reply("ok, I hope Robin has a nice day off work!");
+            return;
+        }
+      },
+    },
+  ],
+});

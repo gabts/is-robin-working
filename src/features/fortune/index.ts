@@ -1,89 +1,6 @@
-import type { Client, Message } from "discord.js";
-import * as constants from "../../constants";
-import { Store, StoreState } from "../../state";
+import { robinBot } from "../../robin-bot";
+import { Store } from "../../store";
 import * as utils from "../../utils";
-import type { DiscordSlashCommand } from "../../main";
-
-async function getFortune() {
-  const out = await utils.spawn("fortune", []);
-  return out.stdout;
-}
-
-function getDate(d: Date): string {
-  return [d.getFullYear(), d.getMonth() + 1, d.getDate()].join("-");
-}
-
-const reactions: {
-  check: RegExp;
-  callback: (state: StoreState, event: Message) => void;
-}[] = [
-  {
-    check: /^!fortune$/i,
-    callback: async (state, event) => {
-      const { id, username } = event.author;
-      const { nickname } = event.member || {};
-
-      const displayName = nickname || username;
-
-      const userState = state.fortunes[id] || {
-        seen: getDate(new Date(0)),
-        content: "",
-      };
-
-      const hasSeenDaily = userState.seen === getDate(new Date());
-
-      let fortune = hasSeenDaily ? userState.content : null;
-
-      for (let i = 0; i < 100; i++) {
-        const newFortune = (await getFortune()).trim();
-        if (newFortune.length <= 2000) {
-          fortune = newFortune;
-          break;
-        }
-      }
-
-      if (!fortune) {
-        event.reply("Sorry, I am unable to tell your fortune");
-        return;
-      }
-
-      const nextState = {
-        seen: getDate(new Date()),
-        content: fortune,
-      };
-
-      if (!hasSeenDaily) {
-        await Store.update((cstate) => ({
-          fortunes: {
-            ...cstate.fortunes,
-            [id]: nextState,
-          },
-        }));
-      }
-
-      event.reply(`Daily fortune for ${displayName}:\n\`\`\`${fortune}\`\`\``);
-    },
-  },
-];
-
-async function processMessage(event: Message) {
-  if (!event.author) return;
-  if (event.author.id === constants.APPLICATION_ID) return;
-
-  const state = Store.get();
-  const content = event.content.trim();
-
-  try {
-    for (const reaction of reactions) {
-      if (reaction.check.test(content)) {
-        reaction.callback(state, event);
-        return;
-      }
-    }
-  } catch (err) {
-    console.error("Failed to process fortune:", err);
-  }
-}
 
 export interface State {
   fortunes: Record<
@@ -95,28 +12,79 @@ export interface State {
   >;
 }
 
-async function warmup() {
-  const defaultState: State = {
-    fortunes: {},
-  };
+function getDate(d: Date): string {
+  return [d.getFullYear(), d.getMonth() + 1, d.getDate()].join("-");
+}
 
-  return Store.update((state) => {
-    return {
+async function getFortune() {
+  const out = await utils.spawn("fortune", []);
+  return out.stdout;
+}
+
+robinBot.registerFeature({
+  name: "Fortune",
+  // skip: true,
+  warmUp: () => {
+    const defaultState: State = {
+      fortunes: {},
+    };
+
+    return Store.update((state) => ({
       ...defaultState,
       ...state,
-    };
-  });
-}
+    }));
+  },
+  reactions: [
+    {
+      check: /^!fortune$/i,
+      handler: async (message) => {
+        const { id, username } = message.author;
+        const { nickname } = message.member || {};
 
-export function use(client: Client, commands: DiscordSlashCommand[]) {
-  client.on("messageCreate", processMessage);
+        const displayName = nickname || username;
 
-  client.on("ready", async () => {
-    try {
-      await warmup();
-    } catch (err) {
-      console.error("Failed to start fortune:", err);
-      process.exit(1);
-    }
-  });
-}
+        const state = Store.get();
+
+        const userState = state.fortunes[id] || {
+          seen: getDate(new Date()),
+          content: "",
+        };
+
+        const hasSeenDaily = userState.seen === getDate(new Date());
+
+        let fortune = hasSeenDaily ? userState.content : null;
+
+        for (let i = 0; i < 100; i++) {
+          const newFortune = (await getFortune()).trim();
+          if (newFortune.length <= 2000) {
+            fortune = newFortune;
+            break;
+          }
+        }
+
+        if (!fortune) {
+          message.reply("Sorry, I am unable to tell your fortune");
+          return;
+        }
+
+        const nextState = {
+          seen: getDate(new Date()),
+          content: fortune,
+        };
+
+        if (!hasSeenDaily) {
+          await Store.update((cstate) => ({
+            fortunes: {
+              ...cstate.fortunes,
+              [id]: nextState,
+            },
+          }));
+        }
+
+        message.reply(
+          `Daily fortune for ${displayName}:\n\`\`\`${fortune}\`\`\``
+        );
+      },
+    },
+  ],
+});

@@ -1,6 +1,4 @@
-import type { Client, Message } from "discord.js";
-import * as constants from "../../constants";
-import type { DiscordSlashCommand } from "../../main";
+import { robinBot } from "../../robin-bot";
 
 const fortunes = [
   // very positive
@@ -51,43 +49,60 @@ const fortunes = [
   "NOPE!",
 ];
 
-const reactions: {
-  check: RegExp;
-  callback: (match: RegExpMatchArray, event: Message) => Promise<void>;
-}[] = [
-  {
-    check: /^!8ball (.+)$/i,
-    callback: async (match, event) => {
-      const query = match[1];
-      if (!query) return;
+robinBot.registerFeature({
+  name: "Magic 8 Ball",
+  reactions: [
+    {
+      check: /^!8ball (.+)$/i,
+      handler: async (message, match) => {
+        const query = match[1];
+        if (!query) return;
 
-      const index = Math.floor(Math.random() * (fortunes.length - 0.000001));
+        const index = Math.floor(Math.random() * (fortunes.length - 0.000001));
 
-      event.reply(`${query}: \`${fortunes[index]}\``);
+        message.reply(`${query}: \`${fortunes[index]}\``);
+      },
     },
-  },
-];
+  ],
+});
 
-async function processMessage(event: Message) {
-  if (!event.author) return;
-  if (event.author.id === constants.APPLICATION_ID) return;
+// const reactions: {
+//   check: RegExp;
+//   callback: (match: RegExpMatchArray, event: Message) => Promise<void>;
+// }[] = [
+//   {
+//     check: /^!8ball (.+)$/i,
+//     callback: async (match, event) => {
+//       const query = match[1];
+//       if (!query) return;
 
-  const content = event.content.trim();
+//       const index = Math.floor(Math.random() * (fortunes.length - 0.000001));
 
-  try {
-    for (const reaction of reactions) {
-      const match = content.match(reaction.check);
+//       event.reply(`${query}: \`${fortunes[index]}\``);
+//     },
+//   },
+// ];
 
-      if (match) {
-        await reaction.callback(match, event);
-        return;
-      }
-    }
-  } catch (err) {
-    console.error("Failed to process fortune:", err);
-  }
-}
+// async function processMessage(event: Message) {
+//   if (!event.author) return;
+//   if (event.author.id === constants.APPLICATION_ID) return;
 
-export function use(client: Client, commands: DiscordSlashCommand[]) {
-  client.on("messageCreate", processMessage);
-}
+//   const content = event.content.trim();
+
+//   try {
+//     for (const reaction of reactions) {
+//       const match = content.match(reaction.check);
+
+//       if (match) {
+//         await reaction.callback(match, event);
+//         return;
+//       }
+//     }
+//   } catch (err) {
+//     console.error("Failed to process fortune:", err);
+//   }
+// }
+
+// export function use(client: Client, commands: DiscordSlashCommand[]) {
+//   client.on("messageCreate", processMessage);
+// }
