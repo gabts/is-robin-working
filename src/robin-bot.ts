@@ -92,6 +92,8 @@ export const robinBot = new (class RobinBot {
   };
 
   start = async (): Promise<void> => {
+    console.log("robin bot > starting...");
+
     const token = process.env.TOKEN;
     if (!token) throw new Error("no token found");
 
@@ -99,6 +101,8 @@ export const robinBot = new (class RobinBot {
     await this.#registerCommands(token);
 
     this.#client.on("ready", this.#onReady);
+
+    console.log("robin bot > started");
 
     await this.#client.login(token);
   };
@@ -123,7 +127,7 @@ export const robinBot = new (class RobinBot {
   };
 
   #onReady = async (): Promise<void> => {
-    console.log("client ready!");
+    console.log("robin bot > ready");
 
     if (process.env.NODE_ENV !== "production") return;
 

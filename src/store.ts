@@ -18,6 +18,7 @@ export const Store = new (class StoreClass {
   #updateChain: null | Promise<void> = null;
 
   warmup = async (): Promise<void> => {
+    console.log("store > warm up");
     const cachedState = await this.#readCache();
     this.#state = { ...this.#state, ...cachedState };
   };
