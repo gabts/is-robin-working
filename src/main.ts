@@ -1,3 +1,4 @@
+import { Store } from "./store";
 import { robinBot } from "./robin-bot";
 
 import "./features/fortune";
@@ -8,7 +9,9 @@ import "./features/tic-tac-toe";
 import "./features/weather";
 import "./features/word";
 
-robinBot.start().catch((err) => {
-  console.error(err);
-  process.exit(1);
+Store.warmup().then(() => {
+  robinBot.start().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
 });
