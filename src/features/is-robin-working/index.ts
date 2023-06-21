@@ -72,6 +72,11 @@ const feature: Feature = {
       handler: (context, message) => {
         const state = context.store.get();
 
+        context.achievements.append("robin", message, (state) => {
+          state.queries += 1;
+          return state;
+        });
+
         if (state.isWorking) {
           message.reply("yes!");
           return;
@@ -82,11 +87,6 @@ const feature: Feature = {
           ? "tomorrow"
           : `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
 
-        context.achievements.append("robin", message, (state) => {
-          state.queries += 1;
-          return state;
-        });
-
         message.reply(`no, but he'll be back ${nextDateString}!`);
       },
     },
@@ -96,6 +96,11 @@ const feature: Feature = {
       handler: (context, message) => {
         const nextDate = nextWorkingDate(context.store.get().isWorking);
 
+        context.achievements.append("robin", message, (state) => {
+          state.queries += 1;
+          return state;
+        });
+
         if (utils.isTomorrow(nextDate)) {
           message.reply("yes!");
           return;
@@ -104,11 +109,6 @@ const feature: Feature = {
         const nextDateString = `${nextDate.getDate()}/${
           nextDate.getMonth() + 1
         }`;
-
-        context.achievements.append("robin", message, (state) => {
-          state.queries += 1;
-          return state;
-        });
 
         message.reply(`no, but he'll be back ${nextDateString}!`);
       },
