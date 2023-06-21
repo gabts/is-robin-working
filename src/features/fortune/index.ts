@@ -23,10 +23,8 @@ function getDate(d: Date): string {
 }
 
 async function getFortune() {
-  return "Fortune: :)";
-
-  /*const out = await utils.spawn("fortune", []);
-  return out.stdout;*/
+  const out = await utils.spawn("fortune", []);
+  return out.stdout;
 }
 
 export const feature: Feature = {
