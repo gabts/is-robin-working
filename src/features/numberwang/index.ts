@@ -1,19 +1,34 @@
 import * as constants from "../../constants";
 import { getDisplayName } from "../../utils";
-import { robinBot } from "../../robin-bot";
+import { Feature } from "../../types";
 
 interface Game {
   answer: number;
 }
 
+export interface AchievementState {
+  guesses: number;
+  gamesWon: number;
+}
+
 const games = new Map<string, Game>();
 
-robinBot.registerFeature({
+const feature: Feature = {
   name: "Numberwang",
+  warmUp: (context) => {
+    context.achievements.set("numberwang", {
+      initialState: {
+        guesses: 0,
+        gamesWon: 0,
+      },
+
+      achievements: [],
+    });
+  },
   reactions: [
     {
       check: /^!numberwang \d+ \d+$/i,
-      handler: async (message, match) => {
+      handler: async (_context, message, match) => {
         if (
           message.channelId !== constants.TEAM_HOME_NUMBERWANG_CHANNEL_ID &&
           message.channelId !== constants.GABRIEL_DEV_CHANNEL_ID &&
@@ -54,7 +69,7 @@ robinBot.registerFeature({
 
     {
       check: /^!numberwang stop$/,
-      handler: (message) => {
+      handler: (_context, message) => {
         const currentGame = games.get(message.channelId);
         if (!currentGame) return;
         games.delete(message.channelId);
@@ -64,7 +79,7 @@ robinBot.registerFeature({
 
     {
       check: /^\d+$/i,
-      handler: (message, match) => {
+      handler: (context, message, match) => {
         const currentGame = games.get(message.channelId);
         if (!currentGame) return;
 
@@ -73,10 +88,27 @@ robinBot.registerFeature({
         const { answer } = currentGame;
 
         if (guess > answer) {
+          context.achievements.append("numberwang", message, (state) => {
+            state.guesses += 1;
+            return state;
+          });
+
           message.reply("too high");
         } else if (guess < answer) {
+          context.achievements.append("numberwang", message, (state) => {
+            state.guesses += 1;
+            return state;
+          });
+
           message.reply("too low");
         } else {
+          context.achievements.append("numberwang", message, (state) => {
+            state.guesses += 1;
+            state.gamesWon += 1;
+
+            return state;
+          });
+
           message.reply(
             `that's numberwang! ${getDisplayName(message)} wins! 🎉🎉🎉`
           );
@@ -85,4 +117,6 @@ robinBot.registerFeature({
       },
     },
   ],
-});
+};
+
+export default feature;

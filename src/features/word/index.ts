@@ -1,21 +1,54 @@
 import { getDisplayName } from "../../utils";
 import { answers } from "./answers";
 import { guesses } from "./guesses";
-import { robinBot } from "../../robin-bot";
+import { Feature } from "../../types";
 
 interface Game {
   answer: string;
   guesses: string[];
 }
 
+export interface AchievementState {
+  gamesSucceededTotal: number;
+
+  gamesSucceeded1: number;
+  gamesSucceeded2: number;
+  gamesSucceeded3: number;
+  gamesSucceeded4: number;
+  gamesSucceeded5: number;
+  gamesSucceeded6: number;
+
+  gamesFailed: number;
+}
+
 const map = new Map<string, Game>();
 
-robinBot.registerFeature({
+const feature: Feature = {
   name: "Word",
+
+  warmUp: (context) => {
+    context.achievements.set("word", {
+      initialState: {
+        gamesSucceededTotal: 0,
+
+        gamesSucceeded1: 0,
+        gamesSucceeded2: 0,
+        gamesSucceeded3: 0,
+        gamesSucceeded4: 0,
+        gamesSucceeded5: 0,
+        gamesSucceeded6: 0,
+
+        gamesFailed: 0,
+      },
+
+      achievements: [],
+    });
+  },
+
   reactions: [
     {
       check: /^!word$/i,
-      handler: async (message) => {
+      handler: async (_context, message) => {
         const authorId = message.author.id;
 
         const game = map.get(authorId);
@@ -39,7 +72,7 @@ robinBot.registerFeature({
     },
     {
       check: /^!word \w{5}$/i,
-      handler: async (message, match) => {
+      handler: async (context, message, match) => {
         const authorId = message.author.id;
 
         const game = map.get(authorId);
@@ -74,10 +107,48 @@ robinBot.registerFeature({
         let response = "";
 
         if (guess === answer) {
+          context.achievements.append("word", message, (state) => {
+            state.gamesSucceededTotal += 1;
+
+            // hahahahah I KNOW I KNOW, TYPING OK
+            switch (game.guesses.length) {
+              case 1:
+                state.gamesSucceeded1 += 1;
+                break;
+
+              case 2:
+                state.gamesSucceeded2 += 1;
+                break;
+
+              case 3:
+                state.gamesSucceeded3 += 1;
+                break;
+
+              case 4:
+                state.gamesSucceeded4 += 1;
+                break;
+
+              case 5:
+                state.gamesSucceeded5 += 1;
+                break;
+
+              case 6:
+                state.gamesSucceeded6 += 1;
+                break;
+            }
+
+            return state;
+          });
+
           response += `${getDisplayName(message)} finished game in ${
             game.guesses.length
           } moves! 🎉🎉🎉`;
         } else if (game.guesses.length === 6) {
+          context.achievements.append("word", message, (state) => {
+            state.gamesFailed += 1;
+            return state;
+          });
+
           response += `Game over. The word was "${answer}".`;
         }
 
@@ -93,4 +164,6 @@ robinBot.registerFeature({
       },
     },
   ],
-});
+};
+
+export default feature;

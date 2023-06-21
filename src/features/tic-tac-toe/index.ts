@@ -1,4 +1,4 @@
-import { robinBot } from "../../robin-bot";
+import { Feature } from "../../types";
 
 type Player = 1 | 2;
 type Tile = 0 | Player;
@@ -61,12 +61,12 @@ function checkFinished(board: Board, player: Player) {
   return false;
 }
 
-robinBot.registerFeature({
+const feature: Feature = {
   name: "TicTacToe",
   reactions: [
     {
       check: /^!tic-tac-toe$/i,
-      handler: (message) => {
+      handler: (_context, message) => {
         const currentGame = games.get(message.channelId);
         if (currentGame) return;
 
@@ -88,14 +88,14 @@ robinBot.registerFeature({
     },
     {
       check: /^!tic-tac-toe stop$/i,
-      handler: (message) => {
+      handler: (_context, message) => {
         games.delete(message.channelId);
         message.reply("tic tac toe game stopped.");
       },
     },
     {
       check: /^([A-C][1-3]|[1-3][A-C])$/i,
-      handler: (message, match) => {
+      handler: (_context, message, match) => {
         const game = games.get(message.channelId);
         if (!game) return;
 
@@ -143,4 +143,6 @@ robinBot.registerFeature({
       },
     },
   ],
-});
+};
+
+export default feature;

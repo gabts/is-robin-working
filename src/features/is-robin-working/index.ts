@@ -1,33 +1,36 @@
-import { Store } from "../../store";
 import * as utils from "../../utils";
 import {
   isWeekendOrVacationOrHoliday,
   nextWorkingDate,
 } from "./next-working-date";
 
-import { robinBot } from "../../robin-bot";
+import { Context, Feature } from "../../types";
+
+export interface AchievementState {
+  queries: number;
+}
 
 export interface State {
   isWorking: boolean;
   lastUpdateMs: number;
 }
 
-function warmup() {
+function warmup(context: Context) {
   const defaultState: State = {
     isWorking: false,
     lastUpdateMs: 0,
   };
 
-  Store.update((state) => ({
+  context.store.update((state) => ({
     ...defaultState,
     ...state,
   }));
 }
 
-function refreshState() {
+function refreshState(context: Context) {
   console.log("Is Robin Working > refreshing state");
 
-  return Store.update((state) => {
+  return context.store.update((state) => {
     const lastUpdateDate = new Date(state.lastUpdateMs).getDate();
     const today = new Date();
     const date = today.getDate();
@@ -42,13 +45,21 @@ function refreshState() {
   });
 }
 
-robinBot.registerFeature({
+const feature: Feature = {
   name: "Is Robin Working",
-  warmUp: () => {
+  warmUp: (context) => {
+    context.achievements.set("robin", {
+      initialState: {
+        queries: 0,
+      },
+
+      achievements: [],
+    });
+
     try {
-      warmup();
-      refreshState();
-      const interval = setInterval(refreshState, 1000 * 60 * 60);
+      warmup(context);
+      refreshState(context);
+      const interval: any = setInterval(refreshState, 1000 * 60 * 60);
       interval.unref();
     } catch (err) {
       console.error(err);
@@ -58,8 +69,8 @@ robinBot.registerFeature({
   reactions: [
     {
       check: /^is\s+(robin|<:pizzarobin:1024343299487698974>)\s+working\??$/i,
-      handler: (message) => {
-        const state = Store.get();
+      handler: (context, message) => {
+        const state = context.store.get();
 
         if (state.isWorking) {
           message.reply("yes!");
@@ -71,14 +82,19 @@ robinBot.registerFeature({
           ? "tomorrow"
           : `${nextDate.getDate()}/${nextDate.getMonth() + 1}`;
 
+        context.achievements.append("robin", message, (state) => {
+          state.queries += 1;
+          return state;
+        });
+
         message.reply(`no, but he'll be back ${nextDateString}!`);
       },
     },
 
     {
       check: /^is\s+robin\s+working\s+tomorrow\??$/i,
-      handler: (message) => {
-        const nextDate = nextWorkingDate(Store.get().isWorking);
+      handler: (context, message) => {
+        const nextDate = nextWorkingDate(context.store.get().isWorking);
 
         if (utils.isTomorrow(nextDate)) {
           message.reply("yes!");
@@ -89,18 +105,23 @@ robinBot.registerFeature({
           nextDate.getMonth() + 1
         }`;
 
+        context.achievements.append("robin", message, (state) => {
+          state.queries += 1;
+          return state;
+        });
+
         message.reply(`no, but he'll be back ${nextDateString}!`);
       },
     },
 
     {
       check: /^\/is-robin-working (no|yes)$/i,
-      handler: (message) => {
+      handler: (context, message) => {
         const [_, nextState] = message.content.split(" ");
 
         if (!nextState) return;
 
-        const state = Store.get();
+        const state = context.store.get();
 
         switch (nextState.toLowerCase()) {
           case "yes":
@@ -123,7 +144,7 @@ robinBot.registerFeature({
               return;
             }
 
-            Store.update(() => ({ isWorking: true }));
+            context.store.update(() => ({ isWorking: true }));
             message.reply("ok, everyone will be happy Robin is working today!");
             return;
 
@@ -133,11 +154,13 @@ robinBot.registerFeature({
               return;
             }
 
-            Store.update(() => ({ isWorking: false }));
+            context.store.update(() => ({ isWorking: false }));
             message.reply("ok, I hope Robin has a nice day off work!");
             return;
         }
       },
     },
   ],
-});
+};
+
+export default feature;

@@ -1,8 +1,12 @@
 import type { Message } from "discord.js";
 import * as qs from "querystring";
-import { Store } from "../../store";
 import * as utils from "../../utils";
-import { robinBot } from "../../robin-bot";
+
+import { Feature } from "../../types";
+
+export interface AchievementState {
+  queries: number;
+}
 
 function convertKPHtoMS(value: number): string {
   // km/hour -> 1000m/3600s -> 10/36 -> 5/18 -> 0.2777777777777778
@@ -96,15 +100,23 @@ async function getCurrentWeather(
   return weather;
 }
 
-robinBot.registerFeature({
+const feature: Feature = {
   name: "Weather",
   skip: !apiKey,
-  warmUp: () => {
+  warmUp: (context) => {
+    context.achievements.set("weather", {
+      initialState: {
+        queries: 0,
+      },
+
+      achievements: [],
+    });
+
     const defaultState: State = {
       weather: {},
     };
 
-    return Store.update((state) => ({
+    return context.store.update((state) => ({
       ...defaultState,
       ...state,
     }));
@@ -112,13 +124,13 @@ robinBot.registerFeature({
   reactions: [
     {
       check: /^!weather set (.+)$/i,
-      handler: async (message, match) => {
+      handler: async (context, message, match) => {
         const userId = message.author.id;
         const query = match[1];
 
         if (!query) return;
 
-        await Store.update((state) => {
+        await context.store.update((state) => {
           const user: UserState = state.weather[userId] || {};
           user.defaultLocation = query;
 
@@ -140,19 +152,25 @@ robinBot.registerFeature({
 
     {
       check: /^!weather (.+)$/i,
-      handler: async (message, match) => {
+      handler: async (context, message, match) => {
         const query = match[1];
         if (!query) return;
+
+        context.achievements.append("weather", message, (state) => {
+          state.queries += 1;
+          return state;
+        });
+
         await replyWeather(message, query);
       },
     },
 
     {
       check: /^!weather$/i,
-      handler: async (message) => {
+      handler: async (context, message) => {
         if (!message.author) return;
 
-        const user = Store.get().weather[message.author.id];
+        const user = context.store.get().weather[message.author.id];
 
         if (!user || !user.defaultLocation) {
           message.reply(
@@ -161,8 +179,15 @@ robinBot.registerFeature({
           return;
         }
 
+        context.achievements.append("weather", message, (state) => {
+          state.queries += 1;
+          return state;
+        });
+
         await replyWeather(message, user.defaultLocation);
       },
     },
   ],
-});
+};
+
+export default feature;

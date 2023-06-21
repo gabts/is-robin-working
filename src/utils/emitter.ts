@@ -1,19 +1,52 @@
-type Listener = (...args: unknown[]) => void | Promise<void>;
+export default class Emitter<Args extends { [key: string]: any[] }> {
+  #listeners: Record<any, any[]> = {};
 
-export class Emitter {
-  #listeners = new Map<string, Listener[]>();
+  on = <Key extends keyof Args>(
+    evt: Key,
+    callback: (...args: Args[Key]) => void
+  ) => {
+    const l = this.#listeners[evt] || [];
+    this.#listeners[evt] = l;
 
-  on = (evt: string, cb: Listener): void => {
-    const listeners = this.#listeners.get(evt);
-    if (!listeners) return;
-
-    listeners.push(cb);
+    l.push(callback);
   };
 
-  emit = async (evt: string, ...args: unknown[]): Promise<void> => {
-    const listeners = this.#listeners.get(evt);
-    if (!listeners) return;
+  off = <Key extends keyof Args>(
+    evt: Key,
+    callback?: (...args: Args[Key]) => void
+  ) => {
+    if (callback) {
+      const l = this.#listeners[evt] || [];
+      this.#listeners[evt] = l.filter((listener) => listener !== callback);
+    } else {
+      this.#listeners[evt] = [];
+    }
+  };
 
-    await Promise.all(listeners.map((listener) => listener()));
+  emit = <Key extends keyof Args>(evt: Key, ...values: Args[Key]) => {
+    const listeners = this.#listeners[evt] || [];
+    for (const listener of listeners) listener(...values);
+  };
+
+  onPromise = <Key extends keyof Args>(
+    evt: Key,
+    opts: { amount: number } = { amount: 1 }
+  ): Promise<Args[Key][]> => {
+    let resolve: any;
+
+    let at = 0;
+    const payloads: any[] = [];
+    this.on(evt, (...payload) => {
+      at++;
+
+      payloads.push(payload);
+      if (at >= opts.amount) {
+        resolve(payloads);
+      }
+    });
+
+    return new Promise((_resolve) => {
+      resolve = _resolve;
+    });
   };
 }

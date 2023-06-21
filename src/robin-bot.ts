@@ -1,23 +1,97 @@
 import * as Discord from "discord.js";
 import * as constants from "./constants";
+import Emitter from "./utils/emitter";
 
-type CommandHandler = (
-  command: Discord.CommandInteraction<Discord.CacheType>
-) => void | Promise<void>;
+import { Context, CommandHandler, ReactionHandler, Feature } from "./types";
 
-type ReactionHandler = (
-  message: Discord.Message,
-  match: RegExpMatchArray
-) => void | Promise<void>;
+export interface Bot {
+  registerFeature(feature: Feature): void;
+  start(): void | Promise<void>;
+}
 
-export const robinBot = new (class RobinBot {
+type Events = {
+  reply: [string];
+};
+
+export class MockedClient extends Emitter<Events> implements Bot {
+  #features: Feature[] = [];
+
+  constructor(private context: Context) {
+    super();
+  }
+
+  registerFeature = (feature: Feature) => {
+    this.#features.push(feature);
+  };
+
+  sendMessage = async (message: {
+    content: string;
+    channelId?: string;
+    author?: { id?: string; username?: string };
+    member?: { nickname?: string };
+  }) => {
+    const content = message.content.trim();
+
+    const wrappedMessage = {
+      channelId: "channel_id",
+
+      ...message,
+
+      author: {
+        id: "author_id",
+        username: "username",
+        ...(message.author || {}),
+      },
+
+      member: { nickname: "nickname", ...(message.member || {}) },
+
+      guild: {
+        roles: {
+          fetch: () => [],
+          create: (role: any) => console.log("Created role", role),
+        },
+      },
+
+      reply: (str: string) => {
+        console.log(" -- Reply --");
+        console.log(str);
+        console.log("");
+
+        this.emit("reply", str);
+      },
+    };
+
+    console.log(" -- Sending message --");
+    console.log(content);
+    console.log("");
+
+    for (const feature of this.#features) {
+      for (const { check, handler } of feature.reactions || []) {
+        const match = content.match(check);
+
+        if (match) {
+          await handler(this.context, wrappedMessage as any, match);
+          break;
+        }
+      }
+    }
+  };
+
+  start = async () => {
+    for (const feature of this.#features) {
+      await feature.warmUp?.(this.context);
+    }
+  };
+}
+
+export default class RobinBot implements Bot {
   #client: Discord.Client;
   #commands: { name: string; description: string }[] = [];
   #commandHandlers: Record<string, CommandHandler> = {};
   #reactionHandlers: { check: RegExp; handler: ReactionHandler }[] = [];
   #featureWarmUp: (() => Promise<void>)[] = [];
 
-  constructor() {
+  constructor(private context: Context) {
     const intents = {
       intents: [
         Discord.IntentsBitField.Flags.Guilds,
@@ -33,7 +107,7 @@ export const robinBot = new (class RobinBot {
       if (interaction.isCommand()) {
         const { commandName } = interaction;
         const handler = this.#commandHandlers[commandName];
-        if (handler) handler(interaction);
+        if (handler) handler(this.context, interaction);
       }
     });
 
@@ -42,28 +116,16 @@ export const robinBot = new (class RobinBot {
       const content = message.content.trim();
       for (const { check, handler } of this.#reactionHandlers) {
         const match = content.match(check);
+
         if (match) {
-          handler(message, match);
+          handler(this.context, message, match);
           break;
         }
       }
     });
   }
 
-  registerFeature = (args: {
-    name: string;
-    skip?: boolean;
-    warmUp?: () => void | Promise<void>;
-    commands?: {
-      command: string;
-      description: string;
-      handler: CommandHandler;
-    }[];
-    reactions?: {
-      check: RegExp;
-      handler: ReactionHandler;
-    }[];
-  }) => {
+  registerFeature = (args: Feature) => {
     const { commands, name, reactions, skip, warmUp } = args;
 
     if (skip) {
@@ -76,7 +138,7 @@ export const robinBot = new (class RobinBot {
     if (warmUp) {
       this.#featureWarmUp.push(async () => {
         console.log(`robin bot > warm up feature "${name}"`);
-        await warmUp();
+        await warmUp(this.context);
       });
     }
 
@@ -154,4 +216,4 @@ export const robinBot = new (class RobinBot {
       channel.send("I was restarted");
     }
   };
-})();
+}

@@ -1,4 +1,8 @@
-import { robinBot } from "../../robin-bot";
+import { Feature } from "../../types";
+
+export interface AchievementState {
+  queries: number;
+}
 
 const fortunes = [
   // very positive
@@ -49,22 +53,38 @@ const fortunes = [
   "NOPE!",
 ];
 
-robinBot.registerFeature({
+const feature: Feature = {
   name: "Magic 8 Ball",
+  warmUp: (context) => {
+    context.achievements.set("ball", {
+      initialState: {
+        queries: 0,
+      },
+
+      achievements: [],
+    });
+  },
   reactions: [
     {
       check: /^!8ball (.+)$/i,
-      handler: async (message, match) => {
+      handler: async (context, message, match) => {
         const query = match[1];
         if (!query) return;
 
         const index = Math.floor(Math.random() * (fortunes.length - 0.000001));
 
+        context.achievements.append("ball", message, (state) => {
+          state.queries += 1;
+          return state;
+        });
+
         message.reply(`${query}: \`${fortunes[index]}\``);
       },
     },
   ],
-});
+};
+
+export default feature;
 
 // const reactions: {
 //   check: RegExp;

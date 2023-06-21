@@ -1,19 +1,64 @@
 import * as fs from "fs/promises";
+
 import type * as isRobinWorking from "./features/is-robin-working";
 import type * as weather from "./features/weather";
 import type * as fortune from "./features/fortune";
+import type * as achievements from "./features/achievements";
 
 const CACHE_PATH = "../cache.json";
 
-export type StoreState = isRobinWorking.State & weather.State & fortune.State;
+export type StoreState = isRobinWorking.State &
+  weather.State &
+  fortune.State &
+  achievements.State;
 
-export const Store = new (class StoreClass {
+interface Cache {
+  read: () => string | Promise<string | Buffer>;
+  write: (state: StoreState) => void | Promise<void>;
+}
+
+export class MemCache implements Cache {
+  private buffer: string = "";
+  constructor(v: Partial<StoreState>) {
+    this.write({
+      isWorking: false,
+      lastUpdateMs: Date.now(),
+      fortunes: {},
+      weather: {},
+      achievements: {},
+      ...v,
+    });
+  }
+
+  read = () => {
+    return this.buffer;
+  };
+
+  write = (state: StoreState) => {
+    this.buffer = JSON.stringify(state);
+  };
+}
+
+export const fs_cache: Cache = {
+  read: () => {
+    return fs.readFile(CACHE_PATH);
+  },
+
+  write: (state: StoreState) => {
+    return fs.writeFile(CACHE_PATH, JSON.stringify(state));
+  },
+};
+
+export default class Store {
   #state: StoreState = {
     isWorking: false,
     lastUpdateMs: Date.now(),
     fortunes: {},
     weather: {},
+    achievements: {},
   };
+
+  constructor(private cache: Cache = fs_cache) {}
 
   #updateChain: null | Promise<void> = null;
 
@@ -53,15 +98,16 @@ export const Store = new (class StoreClass {
 
   #writeCache = async (state: StoreState): Promise<void> => {
     if (this.#timeout) clearTimeout(this.#timeout);
+
     this.#timeout = setTimeout(async () => {
-      await fs.writeFile(CACHE_PATH, JSON.stringify(state));
+      await this.cache.write(state);
       console.log("store > wrote state to cache.", state);
     }, 100);
   };
 
   #readCache = async (): Promise<Partial<StoreState>> => {
     try {
-      const data = await fs.readFile(CACHE_PATH);
+      const data = await this.cache.read();
       const cachedState = JSON.parse(data.toString("utf8"));
 
       console.log("store > read cached state", cachedState);
@@ -76,4 +122,4 @@ export const Store = new (class StoreClass {
       };
     }
   };
-})();
+}

@@ -1,6 +1,8 @@
-import { robinBot } from "../../robin-bot";
-import { Store } from "../../store";
-import * as utils from "../../utils";
+// ?? I had to include index file, otherwise all exports
+// got stuck inside .default obj.
+import * as utils from "../../utils/index";
+import { Feature } from "../../types";
+import * as Discord from "discord.js";
 
 export interface State {
   fortunes: Record<
@@ -12,24 +14,47 @@ export interface State {
   >;
 }
 
+export interface AchievementState {
+  fortunesReceived: number;
+}
+
 function getDate(d: Date): string {
   return [d.getFullYear(), d.getMonth() + 1, d.getDate()].join("-");
 }
 
 async function getFortune() {
-  const out = await utils.spawn("fortune", []);
-  return out.stdout;
+  return "Fortune: :)";
+
+  /*const out = await utils.spawn("fortune", []);
+  return out.stdout;*/
 }
 
-robinBot.registerFeature({
+export const feature: Feature = {
   name: "Fortune",
   // skip: true,
-  warmUp: () => {
+  warmUp: (context) => {
     const defaultState: State = {
       fortunes: {},
     };
 
-    return Store.update((state) => ({
+    context.achievements.set("fortune", {
+      initialState: {
+        fortunesReceived: 0,
+      },
+
+      achievements: [
+        {
+          constraint: (state) => state.fortunesReceived >= 100,
+          role: {
+            name: "Fortune Teller",
+            color: Discord.Colors.Blue,
+            reason: "This user can see the future by now.",
+          },
+        },
+      ],
+    });
+
+    return context.store.update((state) => ({
       ...defaultState,
       ...state,
     }));
@@ -37,16 +62,16 @@ robinBot.registerFeature({
   reactions: [
     {
       check: /^!fortune$/i,
-      handler: async (message) => {
+      handler: async (context, message) => {
         const { id, username } = message.author;
         const { nickname } = message.member || {};
 
         const displayName = nickname || username;
 
-        const state = Store.get();
+        const state = context.store.get();
 
         const userState = state.fortunes[id] || {
-          seen: getDate(new Date()),
+          seen: getDate(new Date("1970-01-02")),
           content: "",
         };
 
@@ -73,7 +98,16 @@ robinBot.registerFeature({
         };
 
         if (!hasSeenDaily) {
-          await Store.update((cstate) => ({
+          await context.achievements.append(
+            "fortune",
+            message,
+            (achievement) => {
+              achievement.fortunesReceived += 1;
+              return achievement;
+            }
+          );
+
+          await context.store.update((cstate) => ({
             fortunes: {
               ...cstate.fortunes,
               [id]: nextState,
@@ -87,4 +121,6 @@ robinBot.registerFeature({
       },
     },
   ],
-});
+};
+
+export default feature;
