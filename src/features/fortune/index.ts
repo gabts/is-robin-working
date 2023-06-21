@@ -77,7 +77,7 @@ export const feature: Feature = {
 
         let fortune = hasSeenDaily ? userState.content : null;
 
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; !fortune && i < 100; i++) {
           const newFortune = (await getFortune()).trim();
           if (newFortune.length <= 2000) {
             fortune = newFortune;
