@@ -59,7 +59,10 @@ const feature: Feature = {
     try {
       warmup(context);
       refreshState(context);
-      const interval: any = setInterval(refreshState, 1000 * 60 * 60);
+      const interval: any = setInterval(
+        () => refreshState(context),
+        1000 * 60 * 60
+      );
       interval.unref();
     } catch (err) {
       console.error(err);
