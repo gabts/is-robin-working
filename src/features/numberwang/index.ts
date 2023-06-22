@@ -25,7 +25,7 @@ const feature: Feature = {
       achievements: [
         {
           constraint: (state) => state.gamesWon >= 10,
-          progress: (state) => state.gamesWon / 30,
+          progress: (state) => state.gamesWon / 10,
           role: {
             name: "Clairvoyant",
             reason: "Counting sheep to you is moot.",
