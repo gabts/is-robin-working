@@ -48,12 +48,21 @@ function refreshState(context: Context) {
 const feature: Feature = {
   name: "Is Robin Working",
   warmUp: (context) => {
-    context.achievements.set("robin", {
+    context.achievements.setAchievements("robin", {
       initialState: {
         queries: 0,
       },
 
-      achievements: [],
+      achievements: [
+        {
+          constraint: (state) => state.queries >= 30,
+          progress: (state) => state.queries / 30,
+          role: {
+            name: "Nosy",
+            reason: "Would like an AirTag in Robin's bag.",
+          },
+        },
+      ],
     });
 
     try {

@@ -104,12 +104,21 @@ const feature: Feature = {
   name: "Weather",
   skip: !apiKey,
   warmUp: (context) => {
-    context.achievements.set("weather", {
+    context.achievements.setAchievements("weather", {
       initialState: {
         queries: 0,
       },
 
-      achievements: [],
+      achievements: [
+        {
+          constraint: (state) => state.queries >= 50,
+          progress: (state) => state.queries / 50,
+          role: {
+            name: "Weather Boy",
+            reason: "You'd really like to know the weather.",
+          },
+        },
+      ],
     });
 
     const defaultState: State = {

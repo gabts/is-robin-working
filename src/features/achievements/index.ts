@@ -22,6 +22,7 @@ interface UserAchievements {
 
 interface Achievement<T> {
   constraint: (v: T) => boolean;
+  progress: (v: T) => number;
   role: {
     name: string;
     reason: string;
@@ -45,6 +46,37 @@ type Events = {
   new_achievement: [string, string];
 };
 
+function column(size: number, content: string) {
+  const spaces = size - content.length;
+  console.log("Size", size, spaces, content);
+  return content + " ".repeat(spaces);
+}
+
+function formatColumns(rows: (string | number)[][]): string[] {
+  let lengthPerColumn: number[] = [];
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i]!;
+
+    for (let c = 0; c < row.length; c++) {
+      if (lengthPerColumn[c] === undefined) lengthPerColumn.push(0);
+
+      const value = row[c]!.toString();
+      lengthPerColumn[c] = Math.max(lengthPerColumn[c]!, value.length);
+    }
+  }
+
+  return rows.map((columns) =>
+    columns
+      .map((value, i) => column(lengthPerColumn[i]!, value.toString()))
+      .join(" ")
+  );
+}
+
+function clamp(min: number, max: number, value: number) {
+  return value >= min && value <= max ? value : value >= max ? max : min;
+}
+
 export class Achievements extends Emitter<Events> {
   private groups: Record<string, AchievementGroup<any>> = {};
   private roles: Record<string, Discord.Role[] | undefined> = {};
@@ -53,7 +85,32 @@ export class Achievements extends Emitter<Events> {
     super();
   }
 
-  public set = <Key extends Groups>(
+  public getProgress = (authorId: string): string[] => {
+    const keys = Object.keys(this.groups);
+    keys.sort();
+
+    const out: [string, string][] = [];
+
+    const userAchievements = this.store.get().achievements[authorId] || {};
+    for (const key of keys) {
+      const group = this.groups[key]!;
+      const state = userAchievements[key as Groups] || {
+        ...group.initialState,
+      };
+
+      for (const achievement of group.achievements) {
+        const progress = parseInt(
+          (clamp(0, 1, achievement.progress(state)) * 100) as any
+        ).toString();
+
+        out.push([achievement.role.name, progress + "%"]);
+      }
+    }
+
+    return formatColumns(out);
+  };
+
+  public setAchievements = <Key extends Groups>(
     id: Key,
     group: AchievementGroup<UserAchievements[Key]>
   ) => {
@@ -140,7 +197,7 @@ export class Achievements extends Emitter<Events> {
 
       this.emit("new_achievement", authorId, achievement.role.name);
       replies.push(
-        `User just accomplished a new achievement!! ${achievement.role.name}`
+        `User just earned a new trophy! 🎉🎉\n\`${achievement.role.name}\``
       );
     }
 
@@ -177,7 +234,20 @@ export const feature: Feature = {
     }));
   },
 
-  reactions: [],
+  reactions: [
+    {
+      check: /^!achievements$/i,
+      handler: async (context, message) => {
+        const authorId = message.author.id;
+
+        const progress = context.achievements.getProgress(authorId);
+
+        message.reply(
+          "Your trophy progress:\n```" + progress.join("\n") + "```"
+        );
+      },
+    },
+  ],
 };
 
 export default feature;

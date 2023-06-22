@@ -35,17 +35,18 @@ export const feature: Feature = {
       fortunes: {},
     };
 
-    context.achievements.set("fortune", {
+    context.achievements.setAchievements("fortune", {
       initialState: {
         fortunesReceived: 0,
       },
 
       achievements: [
         {
-          constraint: (state) => state.fortunesReceived >= 100,
+          constraint: (state) => state.fortunesReceived >= 30,
+          progress: (state) => state.fortunesReceived / 30,
+
           role: {
             name: "Fortune Teller",
-            color: Discord.Colors.Blue,
             reason: "This user can see the future by now.",
           },
         },

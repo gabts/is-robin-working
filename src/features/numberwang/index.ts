@@ -16,13 +16,22 @@ const games = new Map<string, Game>();
 const feature: Feature = {
   name: "Numberwang",
   warmUp: (context) => {
-    context.achievements.set("numberwang", {
+    context.achievements.setAchievements("numberwang", {
       initialState: {
         guesses: 0,
         gamesWon: 0,
       },
 
-      achievements: [],
+      achievements: [
+        {
+          constraint: (state) => state.gamesWon >= 10,
+          progress: (state) => state.gamesWon / 30,
+          role: {
+            name: "Clairvoyant",
+            reason: "Counting sheep to you is moot.",
+          },
+        },
+      ],
     });
   },
   reactions: [

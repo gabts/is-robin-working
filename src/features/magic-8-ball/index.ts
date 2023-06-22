@@ -56,12 +56,22 @@ const fortunes = [
 const feature: Feature = {
   name: "Magic 8 Ball",
   warmUp: (context) => {
-    context.achievements.set("ball", {
+    context.achievements.setAchievements("ball", {
       initialState: {
         queries: 0,
       },
 
-      achievements: [],
+      achievements: [
+        {
+          constraint: (state) => state.queries >= 30,
+          progress: (state) => state.queries / 30,
+
+          role: {
+            name: "Theist",
+            reason: "Putting faith in the ball.",
+          },
+        },
+      ],
     });
   },
   reactions: [

@@ -1,3 +1,5 @@
+import * as Discord from "discord.js";
+
 import { getDisplayName } from "../../utils";
 import { answers } from "./answers";
 import { guesses } from "./guesses";
@@ -27,7 +29,7 @@ const feature: Feature = {
   name: "Word",
 
   warmUp: (context) => {
-    context.achievements.set("word", {
+    context.achievements.setAchievements("word", {
       initialState: {
         gamesSucceededTotal: 0,
 
@@ -41,7 +43,26 @@ const feature: Feature = {
         gamesFailed: 0,
       },
 
-      achievements: [],
+      achievements: [
+        {
+          constraint: (state) => state.gamesSucceededTotal >= 10,
+          progress: (state) => state.gamesSucceededTotal / 10,
+          role: {
+            name: "Wordsmith",
+            reason: "Soundcloud expects your visit.",
+          },
+        },
+        {
+          constraint: (state) => state.gamesSucceeded1 >= 1,
+          progress: (state) => state.gamesSucceeded1 / 1,
+          role: {
+            name: "God",
+            color: Discord.Colors.Gold,
+            reason:
+              "Guessing to you is something mortals do to combat a weak sense of self.",
+          },
+        },
+      ],
     });
   },
 
