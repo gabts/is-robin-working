@@ -88,7 +88,7 @@ const feature: Feature = {
           return state;
         });
 
-        message.reply(`${query}: \`${fortunes[index]}\``);
+        message.reply(`\`${fortunes[index]}\``);
       },
     },
   ],

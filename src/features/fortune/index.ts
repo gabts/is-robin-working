@@ -58,6 +58,7 @@ export const feature: Feature = {
       ...state,
     }));
   },
+
   reactions: [
     {
       check: /^!fortune$/i,
@@ -115,7 +116,7 @@ export const feature: Feature = {
         }
 
         message.reply(
-          `Daily fortune for ${displayName}:\n\`\`\`${fortune}\`\`\``
+          `Daily :fortune_cookie::\n\`\`\`${fortune}\`\`\``
         );
       },
     },
