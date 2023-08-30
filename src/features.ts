@@ -8,6 +8,7 @@ import Numberwang from "./features/numberwang";
 import TicTacToe from "./features/tic-tac-toe";
 import Weather from "./features/weather";
 import Word from "./features/word";
+import Quote from "./features/quote";
 
 export default function registerFeatures(bot: Bot) {
   bot.registerFeature(AchievementsFeature);
@@ -18,4 +19,5 @@ export default function registerFeatures(bot: Bot) {
   bot.registerFeature(TicTacToe);
   bot.registerFeature(Weather);
   bot.registerFeature(Word);
+  bot.registerFeature(Quote);
 }

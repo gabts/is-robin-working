@@ -3,18 +3,9 @@
 import * as utils from "../../utils/index";
 import { Feature } from "../../types";
 import * as Discord from "discord.js";
-import * as fs from "fs";
-import * as path from "path";
-
-const fortunes = fs
-  .readFileSync(
-    path.resolve(__dirname, "..", "..", "..", "resources", "fortunes.txt")
-  )
-  .toString("utf-8")
-  .split("\n");
 
 export interface State {
-  fortunesN: Record<
+  quotes: Record<
     string,
     {
       seen: string;
@@ -24,7 +15,7 @@ export interface State {
 }
 
 export interface AchievementState {
-  fortunesReceived: number;
+  quotesReceived: number;
 }
 
 function getDate(d: Date): string {
@@ -37,26 +28,26 @@ async function getFortune() {
 }
 
 export const feature: Feature = {
-  name: "Fortune",
+  name: "Quotes",
   // skip: true,
   warmUp: (context) => {
     const defaultState: State = {
-      fortunesN: {},
+      quotes: {},
     };
 
-    context.achievements.setAchievements("fortune", {
+    context.achievements.setAchievements("quote", {
       initialState: {
-        fortunesReceived: 0,
+        quotesReceived: 0,
       },
 
       achievements: [
         {
-          constraint: (state) => state.fortunesReceived >= 30,
-          progress: (state) => state.fortunesReceived / 30,
+          constraint: (state) => state.quotesReceived >= 30,
+          progress: (state) => state.quotesReceived / 30,
 
           role: {
-            name: "Fortune Teller",
-            reason: "This user can see the future by now.",
+            name: "Scholar",
+            reason: "Interested in IRC history.",
           },
         },
       ],
@@ -70,7 +61,7 @@ export const feature: Feature = {
 
   reactions: [
     {
-      check: /^!fortune$/i,
+      check: /^!quote$/i,
       handler: async (context, message) => {
         const { id, username } = message.author;
         const { nickname } = message.member || {};
@@ -79,7 +70,7 @@ export const feature: Feature = {
 
         const state = context.store.get();
 
-        const userState = state.fortunesN[id] || {
+        const userState = state.quotes[id] || {
           seen: getDate(new Date("1970-01-02")),
           content: "",
         };
@@ -88,10 +79,12 @@ export const feature: Feature = {
 
         let fortune = hasSeenDaily ? userState.content : null;
 
-        if (!fortune) {
-          fortune =
-            fortunes[Math.floor(Math.random() * (fortunes.length - 0.0001))] ||
-            null;
+        for (let i = 0; !fortune && i < 100; i++) {
+          const newFortune = (await getFortune()).trim();
+          if (newFortune.length <= 2000) {
+            fortune = newFortune;
+            break;
+          }
         }
 
         if (!fortune) {
@@ -105,24 +98,20 @@ export const feature: Feature = {
         };
 
         if (!hasSeenDaily) {
-          await context.achievements.append(
-            "fortune",
-            message,
-            (achievement) => {
-              achievement.fortunesReceived += 1;
-              return achievement;
-            }
-          );
+          await context.achievements.append("quote", message, (achievement) => {
+            achievement.quotesReceived += 1;
+            return achievement;
+          });
 
           await context.store.update((cstate) => ({
-            fortunesN: {
-              ...cstate.fortunesN,
+            quotes: {
+              ...cstate.quotes,
               [id]: nextState,
             },
           }));
         }
 
-        message.reply(`Daily :fortune_cookie::\n\`\`\`${fortune}\`\`\``);
+        message.reply(`Daily quote:\n\`\`\`${fortune}\`\`\``);
       },
     },
   ],

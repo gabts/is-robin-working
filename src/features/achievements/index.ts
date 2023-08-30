@@ -8,11 +8,13 @@ import type { AchievementState as BallState } from "../magic-8-ball";
 import type { AchievementState as RobinState } from "../is-robin-working";
 import type { AchievementState as NumberwangState } from "../numberwang";
 import type { AchievementState as WeatherState } from "../weather";
+import type { AchievementState as QuoteState } from "../quote";
 
 import Emitter from "../../utils/emitter";
 
 interface UserAchievements {
   fortune: FortuneState & { __achieved?: string[] };
+  quote: QuoteState & { __achieved?: string[] };
   numberwang: NumberwangState & { __achieved?: string[] };
   weather: WeatherState & { __achieved?: string[] };
   ball: BallState & { __achieved?: string[] };

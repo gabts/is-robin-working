@@ -3,6 +3,7 @@ import * as fs from "fs/promises";
 import type * as isRobinWorking from "./features/is-robin-working";
 import type * as weather from "./features/weather";
 import type * as fortune from "./features/fortune";
+import type * as quote from "./features/quote";
 import type * as achievements from "./features/achievements";
 
 const CACHE_PATH = "../cache.json";
@@ -10,6 +11,7 @@ const CACHE_PATH = "../cache.json";
 export type StoreState = isRobinWorking.State &
   weather.State &
   fortune.State &
+  quote.State &
   achievements.State;
 
 interface Cache {
@@ -23,7 +25,8 @@ export class MemCache implements Cache {
     this.write({
       isWorking: false,
       lastUpdateMs: Date.now(),
-      fortunes: {},
+      fortunesN: {},
+      quotes: {},
       weather: {},
       achievements: {},
       ...v,
@@ -53,9 +56,10 @@ export default class Store {
   #state: StoreState = {
     isWorking: false,
     lastUpdateMs: Date.now(),
-    fortunes: {},
+    fortunesN: {},
     weather: {},
     achievements: {},
+    quotes: {},
   };
 
   constructor(private cache: Cache = fs_cache) {}
@@ -117,7 +121,8 @@ export default class Store {
       return {
         isWorking: false,
         lastUpdateMs: Date.now(),
-        fortunes: {},
+        fortunesN: {},
+        quotes: {},
         weather: {},
       };
     }
