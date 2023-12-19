@@ -86,7 +86,7 @@ export class MockedClient extends Emitter<Events> implements Bot {
 
 export default class RobinBot implements Bot {
   #client: Discord.Client;
-  #commands: { name: string; description: string }[] = [];
+  #commands: Discord.SlashCommandBuilder[] = [];
   #commandHandlers: Record<string, CommandHandler> = {};
   #reactionHandlers: { check: RegExp; handler: ReactionHandler }[] = [];
   #featureWarmUp: (() => Promise<void>)[] = [];
@@ -143,9 +143,10 @@ export default class RobinBot implements Bot {
     }
 
     if (commands) {
-      for (const { command, description, handler } of commands) {
-        this.#commands.push({ name: command, description });
-        this.#commandHandlers[command] = handler;
+      for (const { command, handler } of commands) {
+        const cmd = command();
+        this.#commands.push(cmd);
+        this.#commandHandlers[cmd.name] = handler;
       }
     }
 

@@ -23,8 +23,7 @@ export type Feature = {
   skip?: boolean;
   warmUp?: (context: Context) => void | Promise<void>;
   commands?: {
-    command: string;
-    description: string;
+    command: () => Discord.SlashCommandBuilder;
     handler: CommandHandler;
   }[];
   reactions?: {
