@@ -5,6 +5,7 @@ import type * as weather from "./features/weather";
 import type * as fortune from "./features/fortune";
 import type * as quote from "./features/quote";
 import type * as achievements from "./features/achievements";
+import type * as birthday from "./features/birthday";
 
 const CACHE_PATH = "../cache.json";
 
@@ -12,7 +13,8 @@ export type StoreState = isRobinWorking.State &
   weather.State &
   fortune.State &
   quote.State &
-  achievements.State;
+  achievements.State &
+  birthday.State;
 
 interface Cache {
   read: () => string | Promise<string | Buffer>;
@@ -29,6 +31,7 @@ export class MemCache implements Cache {
       quotes: {},
       weather: {},
       achievements: {},
+      birthdays: {},
       ...v,
     });
   }
@@ -60,6 +63,7 @@ export default class Store {
     weather: {},
     achievements: {},
     quotes: {},
+    birthdays: {},
   };
 
   constructor(private cache: Cache = fs_cache) {}
